@@ -16,13 +16,11 @@
 ### Demo
 [Download](https://github.com/mengzhidaren/RecylerViewMultiHeaderView/apk/app-debug.apk?raw=true)
 ## HeaderVideo
-<image src="./img/111.gif" width="180px"/>
+<image src="./img/111.gif" width="300px"/>
 
-## HeaderWebView
-<image src="./img/222.gif" width="180px"/>
+## HeaderView   HeaderWebView
+<image src="./img/222.gif" width="300px"/>  <image src="./img/333.gif" width="180px"/>
 
-## HeaderView
-<image src="./img/333.gif" width="180px"/>
 
 ## 引入
 * Gradle
@@ -56,8 +54,7 @@ compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.1'
     
 ```
 
-
-# 引用资料
+### 参考代码
 * [RecyclerViewHeader](https://github.com/blipinsk/RecyclerViewHeader)
 
 本库的是以RecyclerViewHeader为基础在功能上做的扩展，感谢作者开源库。
