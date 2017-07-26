@@ -28,6 +28,12 @@ public class VideoFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_video, container, false);
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        vlcVideoView.onStop();
+    }
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {

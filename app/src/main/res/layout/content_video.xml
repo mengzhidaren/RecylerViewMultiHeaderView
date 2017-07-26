@@ -9,9 +9,9 @@
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="#494731"
+        android:background="#e458d4"
         android:gravity="center_vertical"
-        android:text="title1   title2   title3   title4" />
+        android:text="         title1        " />
 
     <FrameLayout
         android:layout_width="match_parent"

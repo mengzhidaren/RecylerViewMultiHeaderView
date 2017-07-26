@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MultiHeaderViewDemo</string>
+    <string name="app_name">MultiHeaderView</string>
     <string name="title_activity_video">VideoActivity</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"

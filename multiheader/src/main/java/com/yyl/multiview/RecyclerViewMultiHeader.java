@@ -30,9 +30,13 @@ import java.util.ArrayList;
 
 /**
  * Created by yyl on 2016/5/31/031.
+ * <p>
+ * https://github.com/mengzhidaren/RecylerViewMultiHeaderView
+ *
+ * @author yyl
  */
 public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCallBack {
-    private String tag = "RecyclerViewVideo";
+    private String tag = "RecyclerViewMultiHeader";
     @Visibility
     private int intendedVisibility = VISIBLE;
     private int downTranslation;
@@ -41,16 +45,18 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
     private boolean isAttachedToRecycler;
     private int videoHeight;
 
-    //线程交互有点频繁 用原子操作
-    private volatile boolean hidden = false;
-    private volatile boolean isFullState;
-    private volatile boolean currentStateMax = true;
+    //线程交互有点频繁      在有些奇葩手机上线程更新不同步  用原子操作
+    private volatile boolean hidden;
+    private volatile boolean isFullVideoState;
+    private volatile boolean currentVideoStateMax = true;
     private boolean webViewScrollBarEnabled;
-    private boolean stateSmallDisable;
+    private boolean stateVideoSmallDisable;
     private RecyclerViewDelegate recyclerView;
     private LayoutManagerDelegate layoutManager;
 
     private RecyclerView recyclerRoot;
+    private WebView webViewRoot;
+    //默认视频比例
     private float videoScale = 9f / 16f;
     private float mTouchSlop;
 
@@ -58,22 +64,36 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
     public static final int STATE_HEAD = 1;  //标准的headView
     public static final int STATE_WEB = 2;
     private int state = STATE_VIDEO;
-    private WebView webView;
 
+    /**
+     * 关联头WebView入口
+     *
+     * @param recycler rootView
+     * @param webView  rootWebView
+     */
     public final void attachToWebView(RecyclerView recycler, WebView webView) {
         validate(webView);
-        this.webView = webView;
+        this.webViewRoot = webView;
         this.webViewScrollBarEnabled = webView.isVerticalScrollBarEnabled();
         state = STATE_WEB;
         attachToVideo(recycler, null);
     }
 
+    /**
+     * 关联头View入口
+     *
+     * @param recycler rootView
+     */
     public final void attachToHeader(RecyclerView recycler) {
         state = STATE_HEAD;
         attachToVideo(recycler, null);
     }
 
     /**
+     * 关联视频入口
+     *
+     * @param recycler     rootView
+     * @param screenChange VideoScreenChange
      */
     public final void attachToVideo(@NonNull final RecyclerView recycler, ScreenChangeCallBack screenChange) {
         validate(recycler);
@@ -87,7 +107,7 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
         recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recycler, int dx, int dy) {
-                if (!isFullState && recyclerView.hasItems()) {
+                if (!isFullVideoState && recyclerView.hasItems()) {
                     if (layoutManager.isFirstRowVisible()) {
                         int offset = recyclerView.getScrollOffset(isVertical);//当前recyclerview的偏移量
                         hidden = offset > videoHeight;
@@ -164,21 +184,19 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
                 break;
         }
         onMeasureAll(widthMeasureSpec, heightMeasureSpec);
-        LogUtils.i(tag, "onMeasure  2 measureWidth=" + getMeasuredWidth() + "measureHeight" + getMeasuredHeight());
+        LogUtils.i(tag, "onMeasure  measureWidth=" + getMeasuredWidth() + "measureHeight" + getMeasuredHeight());
     }
 
-    /**
-     * 指定测量视频的大小
-     */
+    //指定测量视频的大小
     private void onMeasureVideo(int widthMeasureSpec, int heightMeasureSpec, int heightParams) {
-        if (isFullState && heightParams != FrameLayout.LayoutParams.MATCH_PARENT) {
+        if (isFullVideoState && heightParams != FrameLayout.LayoutParams.MATCH_PARENT) {
             getLayoutParams().height = FrameLayout.LayoutParams.MATCH_PARENT;
-        } else if (!isFullState && heightParams != FrameLayout.LayoutParams.WRAP_CONTENT) {
+        } else if (!isFullVideoState && heightParams != FrameLayout.LayoutParams.WRAP_CONTENT) {
             getLayoutParams().height = FrameLayout.LayoutParams.WRAP_CONTENT;
         }
         int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
         int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
-        measureHeight = isFullState ? measureHeight : (int) (measureWidth * videoScale);
+        measureHeight = isFullVideoState ? measureHeight : (int) (measureWidth * videoScale);
         setMeasuredDimension(measureWidth, measureHeight);
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -245,17 +263,17 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
 
 
     private void onScrollChanged() {
-        if (state != STATE_VIDEO || stateSmallDisable) {
+        if (state != STATE_VIDEO || stateVideoSmallDisable) {
             super.setVisibility(hidden ? INVISIBLE : intendedVisibility);
             if (!hidden) {
                 moveTranslation();
             }
             return;
         }
-        if (isFullState) {//全屏无动作
+        if (isFullVideoState) {//全屏无动作
             return;
         }
-        if (hidden == currentStateMax) {
+        if (hidden == currentVideoStateMax) {
             if (screenChangeSmall != null) {
                 screenChangeSmall.changeMiniScaleState(hidden);
             }
@@ -284,7 +302,7 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
 
     private void changeSmallState() {
         if (state != STATE_VIDEO) return;
-        currentStateMax = false;
+        currentVideoStateMax = false;
         setScaleX(0.5f);
         setScaleY(0.5f);
         setTranslationX(getWidth() >> 2);
@@ -294,7 +312,7 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
 
     private void changePrimordialState() {
         if (state != STATE_VIDEO) return;
-        currentStateMax = true;
+        currentVideoStateMax = true;
         primordialState();
     }
 
@@ -309,7 +327,7 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
     /**
      * 移动偏移量
      *
-     * @return
+     * @return 偏移量
      */
     private int calculateTranslation() {
         int offset = recyclerView.getScrollOffset(isVertical);
@@ -367,11 +385,11 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
         if (state == STATE_WEB) {
             return true;
         }
-        if (hidden && !isFullState && state == STATE_VIDEO) {
+        if (hidden && !isFullVideoState && state == STATE_VIDEO) {
             //点击小屏播放器
             return true;
         }
-        if (isFullState) {
+        if (isFullVideoState) {
             //全屏不拦截 继续向下传递事件
             return false;
         }
@@ -390,14 +408,14 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
         if (state == STATE_WEB) {
             return onTouchWebView(event);
         }
-        if (hidden && !isFullState && state == STATE_VIDEO) {
+        if (hidden && !isFullVideoState && state == STATE_VIDEO) {
             if (event.getAction() == MotionEvent.ACTION_UP) {//点击小屏播放器
                 if (smallOnClick != null)
                     smallOnClick.onClick();
             }
             return true;
         }
-        if (isFullState) {
+        if (isFullVideoState) {
             //全屏不向上传事件 也就是不向recyclerView发送事件在这一层消费掉
             return true;
         }
@@ -672,20 +690,20 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
         return recyclerRoot;
     }
 
-    private WebView getWebView() {
-        return webView;
+    private WebView getWebViewRoot() {
+        return webViewRoot;
     }
 
     private boolean isPointerIndexWeb;
     private boolean isPointerIndexRecycler;
-    private boolean webNotControl;
+    private boolean webViewCanNotControl;
     private float lastRawY;
     private float fristRawY;
-    private boolean startMove;
+    private boolean canMove;
     private float moveOffset;
 
     private boolean onTouchWebView(MotionEvent e) {
-        if (getWebView() == null || getRecyclerViewRoot() == null) {
+        if (getWebViewRoot() == null || getRecyclerViewRoot() == null) {
             return super.onTouchEvent(e);//这里不能被调用
         }
         int action = e.getAction();
@@ -694,19 +712,19 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
                 getRecyclerViewRoot().onTouchEvent(e);
                 break;
             case MotionEvent.ACTION_UP:
-                getWebView().onTouchEvent(e);
+                getWebViewRoot().onTouchEvent(e);
                 if (!isRecyclerViewTop()) {
                     getRecyclerViewRoot().onTouchEvent(e);
                 }
-                getWebView().setVerticalScrollBarEnabled(webViewScrollBarEnabled);
+                getWebViewRoot().setVerticalScrollBarEnabled(webViewScrollBarEnabled);
                 break;
             case MotionEvent.ACTION_DOWN:
                 lastRawY = e.getRawY();
                 fristRawY = e.getRawY();
-                startMove = false;
+                canMove = false;
                 isPointerIndexRecycler = true;
                 moveOffset = e.getY() - e.getRawY();
-                getWebView().onTouchEvent(e);
+                getWebViewRoot().onTouchEvent(e);
                 LogUtils.i(tag, "ACTION_DOWN");
                 return true;
             case MotionEvent.ACTION_MOVE:
@@ -714,16 +732,16 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
                 float off = fristRawY - newY;
                 boolean moveUP = lastRawY - newY > 0;//移动方向
                 lastRawY = e.getRawY();
-                if (!startMove && Math.abs(off) > mTouchSlop + 0.5f) {//开始移动
-                    startMove = true;
+                if (!canMove && Math.abs(off) > mTouchSlop + 0.5f) {//开始移动
+                    canMove = true;
                 }
-                if (!startMove) {
-                    getWebView().onTouchEvent(e);//没有移动时就当发生了  点击事件  发送给WebView
+                if (!canMove) {
+                    getWebViewRoot().onTouchEvent(e);//没有移动时就当发生了  点击事件  发送给WebView
                     return true;
                 }
-                webNotControl = !isRecyclerViewTop();
+                webViewCanNotControl = !isRecyclerViewTop();
                 if (moveUP) {//向上移动
-                    if (webNotControl) {
+                    if (webViewCanNotControl) {
                         reTryRecyclerViewTouchEvent(e);
                         return true;
                     }
@@ -734,7 +752,7 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
                     }
                 } else {//向下移动
                     //   LogUtils.i(tag, "MOVE Down    webNotControl=" + webNotControl + "  isPointerIndexRecycler=" + isPointerIndexRecycler);
-                    if (webNotControl) {
+                    if (webViewCanNotControl) {
                         reTryRecyclerViewTouchEvent(e);
                     } else {
                         reTryWebTouchEvent(e);
@@ -750,28 +768,32 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
 
     /**
      * 分发新事件to  Web
+     *
+     * @param e MotionEvent
      */
     private void reTryWebTouchEvent(MotionEvent e) {
         if (isPointerIndexWeb) {
             isPointerIndexWeb = false;
             e.setAction(MotionEvent.ACTION_DOWN);
         }
-        getWebView().onTouchEvent(e);
-      //  LogUtils.i(tag, isPointerIndexWeb + " WebTouch    isRecyclerViewTop()=" + isRecyclerViewTop() + "   isWebViewBottom=" + isWebViewBottom());
+        getWebViewRoot().onTouchEvent(e);
+        //  LogUtils.i(tag, isPointerIndexWeb + " WebTouch    isRecyclerViewTop()=" + isRecyclerViewTop() + "   isWebViewBottom=" + isWebViewBottom());
     }
 
     /**
      * 分发新事件 to  RecyclerView
+     *
+     * @param e MotionEvent
      */
     private void reTryRecyclerViewTouchEvent(MotionEvent e) {
         if (isPointerIndexRecycler) {
             isPointerIndexRecycler = false;
             isPointerIndexWeb = true;
             e.setAction(MotionEvent.ACTION_CANCEL);
-            getWebView().onTouchEvent(e);
+            getWebViewRoot().onTouchEvent(e);
             e.setAction(MotionEvent.ACTION_DOWN);
             moveOffset = e.getY() - e.getRawY();
-            getWebView().setVerticalScrollBarEnabled(false);
+            getWebViewRoot().setVerticalScrollBarEnabled(false);
         }
         MotionEvent recyclerEvent =
                 MotionEvent.obtain(e.getDownTime(),
@@ -790,9 +812,11 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
 
     /**
      * 有些奇葩手机居然滑不到底只能滑到1
+     *
+     * @return isWebViewBottom WebView是否滑到底
      */
     private boolean isWebViewBottom() {
-        WebView w = getWebView();
+        WebView w = getWebViewRoot();
         float webcontent = w.getContentHeight() * w.getScale();
         float webnow = w.getHeight() + w.getScrollY();
         return Math.abs(webcontent - webnow) <= 1;
@@ -800,7 +824,7 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
 
     @Override
     public void onChangeFullScreen(boolean isFullState) {
-        this.isFullState = isFullState;
+        this.isFullVideoState = isFullState;
         if (screenChange != null)
             screenChange.onChangeFullScreen(isFullState);
         if (isFullState) {
@@ -812,8 +836,8 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
         }
     }
 
-    public boolean isFullState() {
-        return isFullState;
+    public boolean isFullVideoState() {
+        return isFullVideoState;
     }
 
 
@@ -831,8 +855,8 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
     private ScreenSmallOnClick smallOnClick;
     private ScreenChangeSmallCallBack screenChangeSmall;
 
-    public void setScreenSmallDisable(boolean stateSmallDisable) {
-        this.stateSmallDisable = stateSmallDisable;
+    public void setScreenSmallDisable(boolean stateVideoSmallDisable) {
+        this.stateVideoSmallDisable = stateVideoSmallDisable;
     }
 
     public void setScreenSmallOnClick(ScreenSmallOnClick smallOnClick) {

@@ -9,8 +9,8 @@ import android.util.Log;
 public class LogUtils {
 
 
-
     public static void i(String tag, String msg) {
-        Log.i(tag,msg);
+        if (BuildConfig.DEBUG)
+            Log.i(tag, msg);
     }
 }
