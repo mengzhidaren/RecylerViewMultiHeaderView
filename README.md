@@ -12,13 +12,11 @@
 （欢迎留言惯性的优化方案）
 
 # 截图
-可以下载Demo查看。
-### Demo
-[Download](https://github.com/mengzhidaren/RecylerViewMultiHeaderView/apk/app-debug.apk?raw=true)
-## HeaderVideo  HeaderView   HeaderWebView
-<image src="./img/111.gif" width="300px"/>  <image src="./img/222.gif" width="300px"/>  <image src="./img/333.gif" width="300px"/>
-
-
+## HeaderVideo  HeaderView   
+<image src="./img/111.gif" width="300px"/>  <image src="./img/222.gif" width="300px"/>  
+## HeaderWebView
+  <image src="./img/333.gif" width="300px"/>
+  
 ## 引入
 * Gradle
 ```groovy
