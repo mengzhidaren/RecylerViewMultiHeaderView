@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RecyclerViewMultiHeader">
+        <attr name="videoScale" format="float" />
+        <attr name="viewState">
+            <enum name="video" value="0" />
+            <enum name="view_header" value="1" />
+            <enum name="web" value="2" />
+        </attr>
+    </declare-styleable>
+</resources>
