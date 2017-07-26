@@ -1,7 +1,7 @@
 ----
 本库是基于RecyclerViewHeader的扩展。
 ###具有可增加RecyclerView头部View的 ViewGroup，支持与WebView，Video,View 嵌套使用
-
+1
 # 特性
 1. 解决webView在RecyclerView中的滑动冲突和点击事件
 2. 增加滑动RecyclerView中视频为小屏模式（功能参考美拍）
