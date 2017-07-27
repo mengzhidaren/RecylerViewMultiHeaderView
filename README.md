@@ -13,7 +13,7 @@
 
 ### Demo
 可以下载Demo查看。
-[Download](https://github.com/mengzhidaren/RecylerViewMultiHeaderView/apk/app-debug.apk?raw=true)
+[Download](https://github.com/mengzhidaren/RecylerViewMultiHeaderView/master/apk/app-debug.apk?raw=true)
 # 截图
 ## HeaderVideo  HeaderView   
 <image src="./img/111.gif" width="300px"/>  <image src="./img/222.gif" width="300px"/>  
