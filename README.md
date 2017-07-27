@@ -1,7 +1,7 @@
 ----
 本库是基于RecyclerViewHeader的扩展。
 ###具有可增加RecyclerView头部View的 ViewGroup，支持与WebView，Video,View 嵌套使用
-1
+
 # 特性
 1. 解决webView在RecyclerView中的滑动冲突和点击事件
 2. 增加滑动RecyclerView中视频为小屏模式（功能参考美拍）
@@ -11,6 +11,9 @@
 1. RecyclerView和webView之间切换时滑动完美  但两个之间的滑动惯性传递不是很完美
 （欢迎留言惯性的优化方案）
 
+### Demo
+可以下载Demo查看。
+[Download](https://github.com/mengzhidaren/RecylerViewMultiHeaderView/apk/app-debug.apk?raw=true)
 # 截图
 ## HeaderVideo  HeaderView   
 <image src="./img/111.gif" width="300px"/>  <image src="./img/222.gif" width="300px"/>  
