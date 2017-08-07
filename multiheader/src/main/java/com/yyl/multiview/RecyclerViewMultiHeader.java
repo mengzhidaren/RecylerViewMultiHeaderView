@@ -1,6 +1,10 @@
 package com.yyl.multiview;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -49,6 +53,8 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
     private volatile boolean hidden;
     private volatile boolean isFullVideoState;
     private volatile boolean currentVideoStateMax = true;
+    private volatile boolean animSmallState;
+    private volatile boolean animMaxState;
     private boolean webViewScrollBarEnabled;
     private boolean stateVideoSmallDisable;
     private RecyclerViewDelegate recyclerView;
@@ -274,11 +280,59 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
             return;
         }
         if (hidden == currentVideoStateMax) {
+            if (hidden) {
+                startAnimSmall();
+            } else {
+                startAnimMax();
+            }
             if (screenChangeSmall != null) {
                 screenChangeSmall.changeMiniScaleState(hidden);
             }
         }
-        changeInVisibleState(hidden);
+        if (!animSmallState && !animMaxState)
+            changeInVisibleState(hidden);
+    }
+
+
+
+    private void startAnimSmall() {
+        animSmallState = true;
+        currentVideoStateMax = false;
+        ObjectAnimator animator1 = ObjectAnimator.ofFloat(this, "scaleX", 1.0f, 0.5f);
+        ObjectAnimator animator2 = ObjectAnimator.ofFloat(this, "scaleY", 1.0f, 0.5f);
+        ObjectAnimator animator3 = ObjectAnimator.ofFloat(this, "translationX", 0f, (float) (getWidth() >> 2));
+        ObjectAnimator animator4 = ObjectAnimator.ofFloat(this, "translationY", -(float) getHeight(), -(float) (getHeight() >> 2));
+        AnimatorSet set = new AnimatorSet();
+        set.setDuration(400);
+        set.addListener(animationSmallListener);
+        set.play(animator1).with(animator2).with(animator3).with(animator4);
+        set.start();
+    }
+
+    private void startAnimMax() {
+        animMaxState = true;
+        currentVideoStateMax = true;
+        ObjectAnimator animator1 = ObjectAnimator.ofFloat(this, "scaleX", 0.5f, 1.0f);
+        ObjectAnimator animator2 = ObjectAnimator.ofFloat(this, "scaleY", 0.5f, 1.0f);
+        ObjectAnimator animator3 = ObjectAnimator.ofFloat(this, "translationX", (float) (getWidth() >> 2), 0f);
+        //ObjectAnimator animator4 = ObjectAnimator.ofFloat(this, "translationY", -(float) (getHeight() >> 2), -(float) getHeight());
+        AnimatorSet set = new AnimatorSet();
+        set.setDuration(400);
+        set.addListener(animationMaxListener);
+        ValueAnimator mValueAnimator = ValueAnimator.ofFloat(0, 100);
+        mValueAnimator.setTarget(this);
+        final float startY = -(float) (getHeight() >> 2);//自身的Y
+        mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                Float mFloat = (Float) animation.getAnimatedValue();
+                int offset = calculateTranslation();//实时偏移量  目标Y
+                float tranY = startY + ((offset - startY) * mFloat / 100f);
+                setTranslationY(tranY);
+            }
+        });
+        set.play(animator1).with(animator2).with(animator3).with(mValueAnimator);
+        set.start();
     }
 
     private void changeInVisibleState(boolean hidden) {
@@ -866,4 +920,48 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
     public void setScreenChangeSmallCallBack(ScreenChangeSmallCallBack screenChangeSmall) {
         this.screenChangeSmall = screenChangeSmall;
     }
+
+
+    private Animator.AnimatorListener animationSmallListener = new Animator.AnimatorListener() {
+        @Override
+        public void onAnimationStart(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            animSmallState = false;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            animSmallState = false;
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+
+        }
+    };
+    private Animator.AnimatorListener animationMaxListener = new Animator.AnimatorListener() {
+        @Override
+        public void onAnimationStart(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            animMaxState = false;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            animMaxState = false;
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+
+        }
+    };
 }

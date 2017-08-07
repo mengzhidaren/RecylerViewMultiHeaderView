@@ -23,7 +23,7 @@
 ## 引入
 * Gradle
 ```groovy
-compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.1'
+compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.2'
 ```
 
 ## 开发
@@ -33,7 +33,7 @@ compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.1'
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:viewState="video"
-            app:videoScale="9/16">
+            app:videoScale="0.5625">//video 9/16
 ....
         </com.yyl.multiview.RecyclerViewMultiHeader>
     
@@ -49,7 +49,8 @@ compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.1'
     public void setScreenSmallOnClick(ScreenSmallOnClick smallOnClick)
     //视频小窗口监听动画事件
     public void setScreenChangeSmallCallBack(ScreenChangeSmallCallBack screenChangeSmall)
-    
+    //视频横竖屏切换
+    public void onChangeFullScreen(boolean isFullState)
 ```
 
 ### 参考代码
