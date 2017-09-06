@@ -1,6 +1,6 @@
 ----
 本库是基于RecyclerViewHeader的扩展。
-###具有可增加RecyclerView头部View的 ViewGroup，支持与WebView，Video,View 嵌套使用
+###RecyclerView头View的ViewGroup，支持与WebView，Video,View 嵌套使用
 
 # 特性
 1. 解决webView在RecyclerView中的滑动冲突和点击事件
@@ -41,16 +41,13 @@ compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.2'
     
 ```
 
-```java
+```
 // 设置视频监听。
     //视频小窗口开关
    public void setScreenSmallDisable(boolean stateVideoSmallDisable)
-    //视频小窗口点击事件
-    public void setScreenSmallOnClick(ScreenSmallOnClick smallOnClick)
-    //视频小窗口监听动画事件
-    public void setScreenChangeSmallCallBack(ScreenChangeSmallCallBack screenChangeSmall)
-    //视频横竖屏切换
-    public void onChangeFullScreen(boolean isFullState)
+    //视频小窗口监听
+   public void setOnVideoSmallCallBack(OnVideoSmallCallBack onVideoSmallCallBack)
+
 ```
 
 ### 参考代码
@@ -62,7 +59,7 @@ compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.2'
 License
 =======
 
-    Copyright 2015 Bartosz Lipiński
+    Copyright 2015 yyl
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
