@@ -42,7 +42,7 @@ public class VideoFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 VideoActivity videoActivity = ((VideoActivity) getActivity());
-                videoActivity.setVideoFullState(!videoActivity.screenFullVideo);
+                videoActivity.onChangeFullScreen(!videoActivity.screenFullVideo);
             }
         });
         vlcVideoView = (VlcVideoView) view.findViewById(R.id.vlcVideo);

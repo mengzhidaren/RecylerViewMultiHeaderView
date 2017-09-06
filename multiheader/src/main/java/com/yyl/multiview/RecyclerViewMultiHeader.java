@@ -6,6 +6,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.support.annotation.CallSuper;
@@ -24,10 +25,6 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 
-import com.yyl.multiview.impl.ScreenChangeCallBack;
-import com.yyl.multiview.impl.ScreenChangeSmallCallBack;
-import com.yyl.multiview.impl.ScreenSmallOnClick;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -39,7 +36,7 @@ import java.util.ArrayList;
  *
  * @author yyl
  */
-public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCallBack {
+public class RecyclerViewMultiHeader extends ViewGroup {
     private String tag = "RecyclerViewMultiHeader";
     @Visibility
     private int intendedVisibility = VISIBLE;
@@ -49,7 +46,7 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
     private boolean isAttachedToRecycler;
     private int videoHeight;
 
-    //线程交互有点频繁      在有些奇葩手机上线程更新不同步  用原子操作
+    //线程交互有点频繁      在有些奇葩手机上线程更新不同步
     private volatile boolean hidden;
     private volatile boolean isFullVideoState;
     private volatile boolean currentVideoStateMax = true;
@@ -82,7 +79,7 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
         this.webViewRoot = webView;
         this.webViewScrollBarEnabled = webView.isVerticalScrollBarEnabled();
         state = STATE_WEB;
-        attachToVideo(recycler, null);
+        attachToVideo(recycler);
     }
 
     /**
@@ -92,23 +89,22 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
      */
     public final void attachToHeader(RecyclerView recycler) {
         state = STATE_HEAD;
-        attachToVideo(recycler, null);
+        attachToVideo(recycler);
     }
 
     /**
      * 关联视频入口
      *
-     * @param recycler     rootView
-     * @param screenChange VideoScreenChange
+     * @param recycler rootView
      */
-    public final void attachToVideo(@NonNull final RecyclerView recycler, ScreenChangeCallBack screenChange) {
+    public final void attachToVideo(@NonNull final RecyclerView recycler) {
         validate(recycler);
-        this.screenChange = screenChange;
         this.recyclerRoot = recycler;
+        this.isFullVideoState = getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         this.recyclerView = RecyclerViewDelegate.with(recycler);
         this.layoutManager = LayoutManagerDelegate.with(recycler.getLayoutManager());
-        isVertical = layoutManager.isVertical();
-        isAttachedToRecycler = true;
+        this.isVertical = layoutManager.isVertical();
+        this.isAttachedToRecycler = true;
         recyclerView.setHeaderDecoration(new HeaderItemDecoration());
         recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -285,14 +281,13 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
             } else {
                 startAnimMax();
             }
-            if (screenChangeSmall != null) {
-                screenChangeSmall.changeMiniScaleState(hidden);
+            if (onVideoSmallCallBack != null) {
+                onVideoSmallCallBack.changeMiniScaleState(this,hidden);
             }
         }
         if (!animSmallState && !animMaxState)
             changeInVisibleState(hidden);
     }
-
 
 
     private void startAnimSmall() {
@@ -464,8 +459,8 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
         }
         if (hidden && !isFullVideoState && state == STATE_VIDEO) {
             if (event.getAction() == MotionEvent.ACTION_UP) {//点击小屏播放器
-                if (smallOnClick != null)
-                    smallOnClick.onClick();
+                if (onVideoSmallCallBack != null)
+                    onVideoSmallCallBack.onClickSmall(this);
             }
             return true;
         }
@@ -877,10 +872,15 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
     }
 
     @Override
-    public void onChangeFullScreen(boolean isFullState) {
-        this.isFullVideoState = isFullState;
-        if (screenChange != null)
-            screenChange.onChangeFullScreen(isFullState);
+    protected void onConfigurationChanged(Configuration newConfig) {
+        LogUtils.i(tag, "newConfig.orientation=" + newConfig.orientation);
+        if (state == STATE_VIDEO) {
+            isFullVideoState = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+            onChangeFullScreen(isFullVideoState);
+        }
+    }
+
+    private void onChangeFullScreen(boolean isFullState) {
         if (isFullState) {
             recyclerRoot.setLayoutFrozen(true);//禁掉touch事件
             primordialState();
@@ -905,20 +905,15 @@ public class RecyclerViewMultiHeader extends ViewGroup implements ScreenChangeCa
         onScrollChanged();
     }
 
-    private ScreenChangeCallBack screenChange;
-    private ScreenSmallOnClick smallOnClick;
-    private ScreenChangeSmallCallBack screenChangeSmall;
+    private OnVideoSmallCallBack onVideoSmallCallBack;
 
     public void setScreenSmallDisable(boolean stateVideoSmallDisable) {
         this.stateVideoSmallDisable = stateVideoSmallDisable;
     }
 
-    public void setScreenSmallOnClick(ScreenSmallOnClick smallOnClick) {
-        this.smallOnClick = smallOnClick;
-    }
 
-    public void setScreenChangeSmallCallBack(ScreenChangeSmallCallBack screenChangeSmall) {
-        this.screenChangeSmall = screenChangeSmall;
+    public void setOnVideoSmallCallBack(OnVideoSmallCallBack onVideoSmallCallBack) {
+        this.onVideoSmallCallBack = onVideoSmallCallBack;
     }
 
 
