@@ -23,7 +23,7 @@
 ## 引入
 * Gradle
 ```groovy
-compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.3'
+compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.5'
 ```
 
 ## 开发

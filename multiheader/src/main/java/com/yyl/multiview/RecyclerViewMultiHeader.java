@@ -62,7 +62,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     //默认视频比例
     private float videoScale = 9f / 16f;
     private float mTouchSlop;
-
+    private int webViewBottomOffset = 4;
     public static final int STATE_VIDEO = 0;
     public static final int STATE_HEAD = 1;  //标准的headView
     public static final int STATE_WEB = 2;
@@ -167,39 +167,43 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         //修改掉自身的高度适应头布局
-        int heightParams = getLayoutParams().height;
-        switch (state) {
-            case STATE_VIDEO:
-                onMeasureVideo(widthMeasureSpec, heightMeasureSpec, heightParams);
-                return;
-            case STATE_WEB:
-                if (heightParams != FrameLayout.LayoutParams.MATCH_PARENT) {//WebView中父高度必须MATCH_PARENT
-                    getLayoutParams().height = FrameLayout.LayoutParams.MATCH_PARENT;
-                }
-                break;
-            case STATE_HEAD:
-                if (heightParams != FrameLayout.LayoutParams.WRAP_CONTENT) {
-                    getLayoutParams().height = FrameLayout.LayoutParams.WRAP_CONTENT;
-                }
-                break;
-            default:
-                break;
+        if (state == STATE_VIDEO) {
+//            09-13 12:21:34.150 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight558
+//            09-13 12:21:34.150 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight558
+//            09-13 12:21:34.170 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight608
+//            09-13 12:21:34.180 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight608
+//            09-13 12:21:34.190 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onLayout   onScrollChanged
+//            09-13 12:21:34.210 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight608
+//            09-13 12:21:34.390 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight720
+//            09-13 12:21:34.390 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onLayout   onScrollChanged
+
+
+
+
+//            09-13 12:23:44.170 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=720measureHeight405
+//            09-13 12:23:44.170 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=720measureHeight405
+//            09-13 12:23:44.200 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=720measureHeight405
+//            09-13 12:23:44.220 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=720measureHeight405
+//            09-13 12:23:44.220 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onLayout   onScrollChanged
+//            09-13 12:23:44.260 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=720measureHeight405
+            onMeasureVideo(widthMeasureSpec, heightMeasureSpec);
+        } else {
+            onMeasureAll(widthMeasureSpec, heightMeasureSpec);
         }
-        onMeasureAll(widthMeasureSpec, heightMeasureSpec);
         LogUtils.i(tag, "onMeasure  measureWidth=" + getMeasuredWidth() + "measureHeight" + getMeasuredHeight());
     }
 
     //指定测量视频的大小
-    private void onMeasureVideo(int widthMeasureSpec, int heightMeasureSpec, int heightParams) {
-        if (isFullVideoState && heightParams != FrameLayout.LayoutParams.MATCH_PARENT) {
-            getLayoutParams().height = FrameLayout.LayoutParams.MATCH_PARENT;
-        } else if (!isFullVideoState && heightParams != FrameLayout.LayoutParams.WRAP_CONTENT) {
-            getLayoutParams().height = FrameLayout.LayoutParams.WRAP_CONTENT;
-        }
+    private void onMeasureVideo(int widthMeasureSpec, int heightMeasureSpec) {
         int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
         int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
         measureHeight = isFullVideoState ? measureHeight : (int) (measureWidth * videoScale);
         setMeasuredDimension(measureWidth, measureHeight);
+        if (isFullVideoState && getLayoutParams().height != FrameLayout.LayoutParams.MATCH_PARENT) {
+            getLayoutParams().height = FrameLayout.LayoutParams.MATCH_PARENT;
+        } else if (!isFullVideoState && getLayoutParams().height == FrameLayout.LayoutParams.MATCH_PARENT) {
+            getLayoutParams().height =  FrameLayout.LayoutParams.WRAP_CONTENT;
+        }
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
@@ -209,16 +213,12 @@ public class RecyclerViewMultiHeader extends ViewGroup {
                 child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
             }
         }
+
     }
 
     private void onMeasureAll(int widthMeasureSpec, int heightMeasureSpec) {
         int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
         //int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
-        if (state == STATE_WEB) {
-            if (getLayoutParams().height == FrameLayout.LayoutParams.WRAP_CONTENT) {
-                getLayoutParams().height = FrameLayout.LayoutParams.MATCH_PARENT;
-            }
-        }
         int count = getChildCount();
         final boolean measureMatchParentChildren =
                 MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.EXACTLY ||
@@ -245,6 +245,15 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         setMeasuredDimension(measureWidth,
                 resolveSizeAndState(maxHeight, heightMeasureSpec,
                         childState << MEASURED_HEIGHT_STATE_SHIFT));
+        if (state == STATE_WEB) {
+            if (getLayoutParams().height == FrameLayout.LayoutParams.WRAP_CONTENT) {
+                getLayoutParams().height = FrameLayout.LayoutParams.MATCH_PARENT;
+            }
+        } else if (state == STATE_HEAD) {
+            if (getLayoutParams().height != FrameLayout.LayoutParams.WRAP_CONTENT) {
+                getLayoutParams().height = FrameLayout.LayoutParams.WRAP_CONTENT;
+            }
+        }
         count = mMatchParentChildren.size();
         if (count > 1) {
             for (int i = 0; i < count; i++) {
@@ -282,7 +291,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
                 startAnimMax();
             }
             if (onVideoSmallCallBack != null) {
-                onVideoSmallCallBack.changeMiniScaleState(this,hidden);
+                onVideoSmallCallBack.changeMiniScaleState(this, hidden);
             }
         }
         if (!animSmallState && !animMaxState)
@@ -860,7 +869,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     }
 
     /**
-     * 有些奇葩手机居然滑不到底只能滑到1
+     * 有些奇葩手机居然滑不到底只能滑到2.998
      *
      * @return isWebViewBottom WebView是否滑到底
      */
@@ -868,8 +877,13 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         WebView w = getWebViewRoot();
         float webcontent = w.getContentHeight() * w.getScale();
         float webnow = w.getHeight() + w.getScrollY();
-        return Math.abs(webcontent - webnow) <= 1;
+        return Math.abs(webcontent - webnow) <= webViewBottomOffset;
     }
+
+    public void setWebViewBottomOffset(int webViewBottomOffset) {
+        this.webViewBottomOffset = webViewBottomOffset;
+    }
+
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {

@@ -22,9 +22,9 @@ android {
 }
 
 dependencies {
-   // compile project(':multiheader')
+    compile project(':multiheader')
    // compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.2'
-    compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.3'
+  //  compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.3'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:25.3.1'
