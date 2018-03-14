@@ -6,16 +6,18 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.yyl.multiview.LogUtils;
 import com.yyl.multiview.RecyclerViewMultiHeader;
 import com.yyl.multiview.OnVideoSmallCallBack;
 import com.yyl.view.R;
 import com.yyl.view.base.AdapterDemo;
 import com.yyl.view.fragment.VideoFragment;
+
+import org.videolan.vlc.util.LogUtils;
 
 public class VideoActivity extends AppCompatActivity {
     String tag = "VideoActivity";
@@ -33,8 +35,8 @@ public class VideoActivity extends AppCompatActivity {
                 onChangeFullScreen(!screenFullVideo);
             }
         });
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        recyclerViewMultiHeader = (RecyclerViewMultiHeader) findViewById(R.id.recyclerViewMultiHeader);
+        recyclerView =findViewById(R.id.recyclerView);
+        recyclerViewMultiHeader =  findViewById(R.id.recyclerViewMultiHeader);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new VideoFragment()).commit();
 
         recyclerViewMultiHeader.attachToVideo(recyclerView);
@@ -50,6 +52,11 @@ public class VideoActivity extends AppCompatActivity {
             public void onClickSmall(RecyclerViewMultiHeader viewMultiHeader) {
                 recyclerView.stopScroll();
                 recyclerView.smoothScrollToPosition(0);
+            }
+
+            @Override
+            public void onScrollChanged(int translation) {
+                Log.i(tag, "translation" + translation);
             }
         });
 

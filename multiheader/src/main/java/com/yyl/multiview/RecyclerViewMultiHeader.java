@@ -32,7 +32,7 @@ import java.util.ArrayList;
 /**
  * Created by yyl on 2016/5/31/031.
  * <p>
- * https://github.com/mengzhidaren/RecylerViewMultiHeaderView
+ * https://github.com/mengzhidaren
  *
  * @author yyl
  */
@@ -168,29 +168,11 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         //修改掉自身的高度适应头布局
         if (state == STATE_VIDEO) {
-//            09-13 12:21:34.150 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight558
-//            09-13 12:21:34.150 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight558
-//            09-13 12:21:34.170 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight608
-//            09-13 12:21:34.180 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight608
-//            09-13 12:21:34.190 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onLayout   onScrollChanged
-//            09-13 12:21:34.210 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight608
-//            09-13 12:21:34.390 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=1280measureHeight720
-//            09-13 12:21:34.390 5732-5732/com.yyl.view I/RecyclerViewMultiHeader: onLayout   onScrollChanged
-
-
-
-
-//            09-13 12:23:44.170 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=720measureHeight405
-//            09-13 12:23:44.170 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=720measureHeight405
-//            09-13 12:23:44.200 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=720measureHeight405
-//            09-13 12:23:44.220 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=720measureHeight405
-//            09-13 12:23:44.220 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onLayout   onScrollChanged
-//            09-13 12:23:44.260 8950-8950/com.yyl.view I/RecyclerViewMultiHeader: onMeasure  measureWidth=720measureHeight405
             onMeasureVideo(widthMeasureSpec, heightMeasureSpec);
         } else {
             onMeasureAll(widthMeasureSpec, heightMeasureSpec);
         }
-        LogUtils.i(tag, "onMeasure  measureWidth=" + getMeasuredWidth() + "measureHeight" + getMeasuredHeight());
+        i(tag, "onMeasure  measureWidth=" + getMeasuredWidth() + "measureHeight" + getMeasuredHeight());
     }
 
     //指定测量视频的大小
@@ -202,7 +184,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         if (isFullVideoState && getLayoutParams().height != FrameLayout.LayoutParams.MATCH_PARENT) {
             getLayoutParams().height = FrameLayout.LayoutParams.MATCH_PARENT;
         } else if (!isFullVideoState && getLayoutParams().height == FrameLayout.LayoutParams.MATCH_PARENT) {
-            getLayoutParams().height =  FrameLayout.LayoutParams.WRAP_CONTENT;
+            getLayoutParams().height = FrameLayout.LayoutParams.WRAP_CONTENT;
         }
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -355,6 +337,9 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         } else {
             setTranslationX(translation);
         }
+        if (onVideoSmallCallBack != null && !isFullVideoState) {
+            onVideoSmallCallBack.onScrollChanged(translation);
+        }
     }
 
 
@@ -431,7 +416,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
             if (getHeight() + verticalMargins > 0)
                 videoHeight = getHeight() + verticalMargins;
             recyclerView.onHeaderSizeChanged(getHeight() + verticalMargins, getWidth() + horizontalMargins);
-            LogUtils.i(tag, "onLayout   onScrollChanged");
+            i(tag, "onLayout   onScrollChanged");
             onScrollChanged();
         }
     }
@@ -783,7 +768,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
                 isPointerIndexRecycler = true;
                 moveOffset = e.getY() - e.getRawY();
                 getWebViewRoot().onTouchEvent(e);
-                LogUtils.i(tag, "ACTION_DOWN");
+                i(tag, "ACTION_DOWN");
                 return true;
             case MotionEvent.ACTION_MOVE:
                 float newY = e.getRawY();
@@ -887,7 +872,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        LogUtils.i(tag, "newConfig.orientation=" + newConfig.orientation);
+        i(tag, "newConfig.orientation=" + newConfig.orientation);
         if (state == STATE_VIDEO) {
             isFullVideoState = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
             onChangeFullScreen(isFullVideoState);
@@ -973,4 +958,9 @@ public class RecyclerViewMultiHeader extends ViewGroup {
 
         }
     };
+
+
+    private void i(String tag, String msg) {
+
+    }
 }

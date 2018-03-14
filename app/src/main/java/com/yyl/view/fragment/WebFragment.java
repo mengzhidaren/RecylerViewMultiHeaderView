@@ -35,7 +35,7 @@ public class WebFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        webView = (WebView) view.findViewById(R.id.fragmentWebView);
+        webView =  view.findViewById(R.id.fragmentWebView);
         setWebSeting();
         ((WebActivity) getActivity()).setWebView(webView);
         webView.loadUrl("https://toutiao.io/c/java");

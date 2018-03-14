@@ -17,8 +17,8 @@ public class HeaderViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_header_view);
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        recyclerViewMultiHeader = (RecyclerViewMultiHeader) findViewById(R.id.recyclerViewMultiHeader);
+        recyclerView =  findViewById(R.id.recyclerView);
+        recyclerViewMultiHeader =findViewById(R.id.recyclerViewMultiHeader);
         recyclerViewMultiHeader.attachToHeader(recyclerView);
         recyclerView.setAdapter(new AdapterDemo());
 

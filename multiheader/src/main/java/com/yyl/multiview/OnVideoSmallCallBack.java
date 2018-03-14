@@ -8,4 +8,6 @@ public interface OnVideoSmallCallBack {
     void changeMiniScaleState(RecyclerViewMultiHeader viewMultiHeader, boolean isSmallMini);
 
     void onClickSmall(RecyclerViewMultiHeader viewMultiHeader);
+
+    void onScrollChanged(int translation);
 }
