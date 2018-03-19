@@ -13,8 +13,8 @@
     <com.yyl.multiview.RecyclerViewMultiHeader
         android:id="@+id/recyclerViewMultiHeader"
         android:layout_width="match_parent"
-        app:viewState="web"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:viewState="web">
 
         <FrameLayout
             android:id="@+id/fragment"

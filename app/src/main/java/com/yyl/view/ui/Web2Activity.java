@@ -19,13 +19,15 @@ public class Web2Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web2);
+        setTitle("webView嵌入布局");
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerViewMultiHeader = (RecyclerViewMultiHeader) findViewById(R.id.recyclerViewMultiHeader);
         webView = (WebView) findViewById(R.id.webView2);
         setWebSeting();
-        webView.loadUrl("https://toutiao.io/c/java");
+        recyclerViewMultiHeader.setRequestFullWeb(true);
         recyclerViewMultiHeader.attachToWebView(recyclerView, webView);
         recyclerView.setAdapter(new AdapterDemo());
+        webView.loadUrl("https://toutiao.io/c/java");
     }
 
     private RecyclerView recyclerView;

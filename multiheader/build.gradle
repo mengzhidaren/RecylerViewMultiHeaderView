@@ -1,29 +1,5 @@
 apply plugin: 'com.android.library'
-//apply plugin: 'com.novoda.bintray-release'
-//buildscript {
-//    repositories {
-//        jcenter()
-//    }
-//    dependencies {
-//         classpath 'com.novoda:bintray-release:0.8.0'
-//    }
-//}
-//def siteUrl = 'https://github.com/mengzhidaren/RecylerViewMultiHeaderView'   // 项目的主页
-//tasks.withType(JavaCompile) {
-//    options.encoding = "UTF-8"
-//}
-//tasks.withType(Javadoc) {
-//    options.encoding = "UTF-8"
-//}
-//
-//publish {
-//    userOrg = 'yuyunlongyyl' //用户所在组织
-//    groupId = 'com.yyl.multiview'// 包名
-//    artifactId = 'recyclerview-multiheaderview' // library的名字
-//    publishVersion = '1.0.5'// 版本
-//    desc = 'recyclerview-multiheaderview  support:webView,View,Video' // 描述
-//    website = siteUrl
-//}
+
 android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
@@ -31,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 5
-        versionName "1.0.5"
+        versionCode 20180319
+        versionName "1.0.7"
     }
     buildTypes {
         release {
@@ -48,4 +24,34 @@ android {
 
 dependencies {
     provided 'com.android.support:recyclerview-v7:26.1.0'
+}
+
+
+
+
+
+apply plugin: 'com.novoda.bintray-release'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.novoda:bintray-release:0.8.0'
+    }
+}
+def siteUrl = 'https://github.com/mengzhidaren'   // 项目的主页
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+tasks.withType(Javadoc) {
+    options.encoding = "UTF-8"
+}
+
+publish {
+    userOrg = 'yuyunlongyyl' //用户所在组织
+    groupId = 'com.yyl.multiview'// 包名
+    artifactId = 'recyclerview-multiheaderview' // library的名字
+    publishVersion = '1.0.7'// 版本
+    desc = 'recyclerview-multiheaderview  support:webView,View,Video' // 描述
+    website = siteUrl
 }

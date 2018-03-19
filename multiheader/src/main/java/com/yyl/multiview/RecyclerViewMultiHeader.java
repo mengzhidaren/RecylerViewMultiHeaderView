@@ -27,7 +27,6 @@ import android.widget.FrameLayout;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 
 /**
  * Created by yyl on 2016/5/31/031.
@@ -48,10 +47,10 @@ public class RecyclerViewMultiHeader extends ViewGroup {
 
     //线程交互有点频繁      在有些奇葩手机上线程更新不同步
     private volatile boolean hidden;
-    private volatile boolean isFullVideoState;
     private volatile boolean currentVideoStateMax = true;
     private volatile boolean animSmallState;
     private volatile boolean animMaxState;
+    private boolean isFullVideoState;
     private boolean webViewScrollBarEnabled;
     private boolean stateVideoSmallDisable;
     private RecyclerViewDelegate recyclerView;
@@ -67,6 +66,11 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     public static final int STATE_HEAD = 1;  //标准的headView
     public static final int STATE_WEB = 2;
     private int state = STATE_VIDEO;
+
+    //是否强制全屏显示webView
+    //true 只是减少一次布局计算方法(有代码洁癖时用的)
+    //false  在webView内容不足一屏时 不填充整个VIEW 只是做为一个标准的headView
+    private boolean isRequestFullWeb = true;
 
     /**
      * 关联头WebView入口
@@ -162,13 +166,14 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
-    private final ArrayList<View> mMatchParentChildren = new ArrayList<>(1);
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         //修改掉自身的高度适应头布局
         if (state == STATE_VIDEO) {
             onMeasureVideo(widthMeasureSpec, heightMeasureSpec);
+        } else if (state == STATE_WEB && isRequestFullWeb) {
+            onMeasureWebView(widthMeasureSpec, heightMeasureSpec);
         } else {
             onMeasureAll(widthMeasureSpec, heightMeasureSpec);
         }
@@ -181,77 +186,42 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
         measureHeight = isFullVideoState ? measureHeight : (int) (measureWidth * videoScale);
         setMeasuredDimension(measureWidth, measureHeight);
-        if (isFullVideoState && getLayoutParams().height != FrameLayout.LayoutParams.MATCH_PARENT) {
-            getLayoutParams().height = FrameLayout.LayoutParams.MATCH_PARENT;
-        } else if (!isFullVideoState && getLayoutParams().height == FrameLayout.LayoutParams.MATCH_PARENT) {
-            getLayoutParams().height = FrameLayout.LayoutParams.WRAP_CONTENT;
-        }
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
-                final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(measureWidth, MeasureSpec.EXACTLY);
-                final int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(measureHeight, MeasureSpec.EXACTLY);
-                child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-            }
-        }
+        int newHeightMeasureSpec = MeasureSpec.makeMeasureSpec(measureHeight, MeasureSpec.AT_MOST);
+        measureChildren(widthMeasureSpec, newHeightMeasureSpec);
+    }
 
+    //指定测量webView的大小为全屏
+    private void onMeasureWebView(int widthMeasureSpec, int heightMeasureSpec) {
+        int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
+        setMeasuredDimension(measureWidth, measureHeight);
+        //强制撑满父VIEW 为全屏
+        int newHeightMeasureSpec = MeasureSpec.makeMeasureSpec(measureHeight, MeasureSpec.AT_MOST);
+        measureChildren(widthMeasureSpec, newHeightMeasureSpec);
     }
 
     private void onMeasureAll(int widthMeasureSpec, int heightMeasureSpec) {
-        int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
-        //int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
-        int count = getChildCount();
-        final boolean measureMatchParentChildren =
-                MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.EXACTLY ||
-                        MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.EXACTLY;
-        mMatchParentChildren.clear();
+        //先测量子view的高度
+        measureChildren(widthMeasureSpec, heightMeasureSpec);
         int maxHeight = 0;
-        int childState = 0;
+        int count = getChildCount();
+        //循环获取child的最大高度
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
-                measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
                 final FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) child.getLayoutParams();
                 maxHeight = Math.max(maxHeight,
                         child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
-                childState = combineMeasuredStates(childState, child.getMeasuredState());
-                if (measureMatchParentChildren) {
-                    if (lp.width == FrameLayout.LayoutParams.MATCH_PARENT ||
-                            lp.height == FrameLayout.LayoutParams.MATCH_PARENT) {
-                        mMatchParentChildren.add(child);
-                    }
-                }
             }
         }
-        setMeasuredDimension(measureWidth,
-                resolveSizeAndState(maxHeight, heightMeasureSpec,
-                        childState << MEASURED_HEIGHT_STATE_SHIFT));
-        if (state == STATE_WEB) {
-            if (getLayoutParams().height == FrameLayout.LayoutParams.WRAP_CONTENT) {
-                getLayoutParams().height = FrameLayout.LayoutParams.MATCH_PARENT;
-            }
-        } else if (state == STATE_HEAD) {
-            if (getLayoutParams().height != FrameLayout.LayoutParams.WRAP_CONTENT) {
-                getLayoutParams().height = FrameLayout.LayoutParams.WRAP_CONTENT;
-            }
-        }
-        count = mMatchParentChildren.size();
-        if (count > 1) {
-            for (int i = 0; i < count; i++) {
-                final View child = mMatchParentChildren.get(i);
-                final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
-                final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(measureWidth, MeasureSpec.EXACTLY);
-                final int childHeightMeasureSpec;
-                if (lp.height == FrameLayout.LayoutParams.MATCH_PARENT) {
-                    childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                            getMeasuredHeight(), MeasureSpec.EXACTLY);
-                } else {
-                    childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec, 0, lp.height);
-                }
-                child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-            }
-        }
+
+        int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
+        //设置测量的最大值
+        setMeasuredDimension(maxWidth, maxHeight);
+        //修改当前高度为最大高度值
+        int newHeightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST);
+        //重新赋值给子VIEW   然后重新测量子view的高度
+        measureChildren(widthMeasureSpec, newHeightMeasureSpec);
     }
 
 
@@ -865,6 +835,10 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         return Math.abs(webcontent - webnow) <= webViewBottomOffset;
     }
 
+    /**
+     * 有些奇葩手机居然滑不到底只能滑到2.998
+     *
+     */
     public void setWebViewBottomOffset(int webViewBottomOffset) {
         this.webViewBottomOffset = webViewBottomOffset;
     }
@@ -889,10 +863,22 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         }
     }
 
+    /**
+     * @return 全屏状态
+     */
     public boolean isFullVideoState() {
         return isFullVideoState;
     }
 
+    /**
+     * 是否强制全屏显示webView
+     * 可以在webView加载完成后 如果不足一屏就回调这个方法  setRequestFullWeb(false)   requestLayout();
+     *
+     * @param requestFullWeb true 只是减少一次布局计算方法(有代码洁癖时用的)  false  那么在webView内容不足一屏时 不填充整个VIEW
+     */
+    public void setRequestFullWeb(boolean requestFullWeb) {
+        isRequestFullWeb = requestFullWeb;
+    }
 
     public void changeSmallState(boolean isShow) {
         setScreenSmallDisable(!isShow);
@@ -906,6 +892,9 @@ public class RecyclerViewMultiHeader extends ViewGroup {
 
     private OnVideoSmallCallBack onVideoSmallCallBack;
 
+    /**
+     * 关闭 mini 小屏功能
+     */
     public void setScreenSmallDisable(boolean stateVideoSmallDisable) {
         this.stateVideoSmallDisable = stateVideoSmallDisable;
     }

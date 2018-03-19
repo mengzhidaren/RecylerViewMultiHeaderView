@@ -16,6 +16,7 @@ public class WebActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
+        setTitle("WebFragment嵌入布局");
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerViewMultiHeader = (RecyclerViewMultiHeader) findViewById(R.id.recyclerViewMultiHeader);
         //  recyclerViewMultiHeader.attachToWebView(recyclerView,);
