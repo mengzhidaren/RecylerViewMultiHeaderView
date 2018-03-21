@@ -14,12 +14,13 @@
         android:id="@+id/recyclerViewMultiHeader"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#ffcccc"
         app:viewState="view_header">
 
         <FrameLayout
             android:id="@+id/fragment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="#cc442f4d">
 
             <ImageView

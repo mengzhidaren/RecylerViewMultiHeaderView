@@ -65,7 +65,8 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     public static final int STATE_VIDEO = 0;
     public static final int STATE_HEAD = 1;  //标准的headView
     public static final int STATE_WEB = 2;
-    private int state = STATE_VIDEO;
+    public static final int STATE_IDLE = 3;
+    private int state = STATE_IDLE;
 
     //是否强制全屏显示webView
     //true 只是减少一次布局计算方法(有代码洁癖时用的)
@@ -83,7 +84,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         this.webViewRoot = webView;
         this.webViewScrollBarEnabled = webView.isVerticalScrollBarEnabled();
         state = STATE_WEB;
-        attachToVideo(recycler);
+        attachToRecyclerView(recycler);
     }
 
     /**
@@ -93,7 +94,12 @@ public class RecyclerViewMultiHeader extends ViewGroup {
      */
     public final void attachToHeader(RecyclerView recycler) {
         state = STATE_HEAD;
-        attachToVideo(recycler);
+        attachToRecyclerView(recycler);
+    }
+
+    public final void attachToVideo(@NonNull final RecyclerView recycler) {
+        state = STATE_VIDEO;
+        attachToRecyclerView(recycler);
     }
 
     /**
@@ -101,15 +107,14 @@ public class RecyclerViewMultiHeader extends ViewGroup {
      *
      * @param recycler rootView
      */
-    public final void attachToVideo(@NonNull final RecyclerView recycler) {
+    public final void attachToRecyclerView(@NonNull final RecyclerView recycler) {
         validate(recycler);
         this.recyclerRoot = recycler;
-        this.isFullVideoState = getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         this.recyclerView = RecyclerViewDelegate.with(recycler);
         this.layoutManager = LayoutManagerDelegate.with(recycler.getLayoutManager());
         this.isVertical = layoutManager.isVertical();
-        this.isAttachedToRecycler = true;
         recyclerView.setHeaderDecoration(new HeaderItemDecoration());
+        this.isAttachedToRecycler = true;
         recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recycler, int dx, int dy) {
@@ -160,7 +165,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
             final TypedArray a = context.obtainStyledAttributes(
                     attrs, R.styleable.RecyclerViewMultiHeader);
             videoScale = a.getFloat(R.styleable.RecyclerViewMultiHeader_videoScale, videoScale);
-            state = a.getInt(R.styleable.RecyclerViewMultiHeader_viewState, STATE_VIDEO);
+            state = a.getInt(R.styleable.RecyclerViewMultiHeader_viewState, STATE_IDLE);
             a.recycle();
         }
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
@@ -371,6 +376,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
             if (child.getVisibility() != GONE) {
                 // final int width = child.getMeasuredWidth();
                 //   final int height = child.getMeasuredHeight();
+                //修改为撑满全屏
                 child.layout(0, 0, getMeasuredWidth(), getMeasuredHeight());
             }
         }
@@ -395,6 +401,8 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     @Override
     @CallSuper
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (!isAttachedToRecycler) return super.onInterceptTouchEvent(event);
+
         if (state == STATE_WEB) {
             return true;
         }
@@ -838,6 +846,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     /**
      * 有些奇葩手机居然滑不到底只能滑到2.998
      *
+     * @param webViewBottomOffset 最小滑动值
      */
     public void setWebViewBottomOffset(int webViewBottomOffset) {
         this.webViewBottomOffset = webViewBottomOffset;
@@ -847,7 +856,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         i(tag, "newConfig.orientation=" + newConfig.orientation);
-        if (state == STATE_VIDEO) {
+        if (state == STATE_VIDEO && isAttachedToRecycler) {
             isFullVideoState = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
             onChangeFullScreen(isFullVideoState);
         }
@@ -893,7 +902,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     private OnVideoSmallCallBack onVideoSmallCallBack;
 
     /**
-     * 关闭 mini 小屏功能
+     * @param stateVideoSmallDisable 关闭 mini 小屏功能
      */
     public void setScreenSmallDisable(boolean stateVideoSmallDisable) {
         this.stateVideoSmallDisable = stateVideoSmallDisable;
