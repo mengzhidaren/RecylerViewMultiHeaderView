@@ -35,7 +35,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @author yyl
  */
-public class RecyclerViewMultiHeader extends ViewGroup {
+public class RecyclerViewMultiHeader extends FrameLayout {
     private String tag = "RecyclerViewMultiHeader";
     @Visibility
     private int intendedVisibility = VISIBLE;
@@ -65,7 +65,8 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     public static final int STATE_VIDEO = 0;
     public static final int STATE_HEAD = 1;  //标准的headView
     public static final int STATE_WEB = 2;
-    public static final int STATE_IDLE = 3;
+    public static final int STATE_HEAD_TOP = 3; //以最顶层VIEW的高度为最终高度
+    public static final int STATE_IDLE = 10;
     private int state = STATE_IDLE;
 
     //是否强制全屏显示webView
@@ -99,6 +100,11 @@ public class RecyclerViewMultiHeader extends ViewGroup {
 
     public final void attachToVideo(@NonNull final RecyclerView recycler) {
         state = STATE_VIDEO;
+        attachToRecyclerView(recycler);
+    }
+
+    public final void attachToHeaderTopView(@NonNull final RecyclerView recycler) {
+        state = STATE_HEAD_TOP;
         attachToRecyclerView(recycler);
     }
 
@@ -142,6 +148,8 @@ public class RecyclerViewMultiHeader extends ViewGroup {
             recyclerView.reset();
             recyclerView = null;
             layoutManager = null;
+            webViewRoot = null;
+            recyclerRoot = null;
         }
     }
 
@@ -179,13 +187,17 @@ public class RecyclerViewMultiHeader extends ViewGroup {
             onMeasureVideo(widthMeasureSpec, heightMeasureSpec);
         } else if (state == STATE_WEB && isRequestFullWeb) {
             onMeasureWebView(widthMeasureSpec, heightMeasureSpec);
+        } else if (state == STATE_HEAD_TOP) {
+            onMeasureTopView(widthMeasureSpec, heightMeasureSpec);
+        } else if (state == STATE_IDLE) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         } else {
             onMeasureAll(widthMeasureSpec, heightMeasureSpec);
         }
         i(tag, "onMeasure  measureWidth=" + getMeasuredWidth() + "measureHeight" + getMeasuredHeight());
     }
 
-    //指定测量视频的大小
+    //测量视频的大小
     private void onMeasureVideo(int widthMeasureSpec, int heightMeasureSpec) {
         int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
         int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
@@ -195,7 +207,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         measureChildren(widthMeasureSpec, newHeightMeasureSpec);
     }
 
-    //指定测量webView的大小为全屏
+    //测量webView的大小为全屏
     private void onMeasureWebView(int widthMeasureSpec, int heightMeasureSpec) {
         int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
         int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
@@ -205,6 +217,32 @@ public class RecyclerViewMultiHeader extends ViewGroup {
         measureChildren(widthMeasureSpec, newHeightMeasureSpec);
     }
 
+    //以最顶层childView高度为最终高度
+    private void onMeasureTopView(int widthMeasureSpec, int heightMeasureSpec) {
+        //先测量子view的高度
+        measureChildren(widthMeasureSpec, heightMeasureSpec);
+        int maxHeight = 0;
+        int count = getChildCount();
+        //获取child的最顶层高度
+        for (int i = count - 1; i >= 0; i--) {
+            final View child = getChildAt(i);
+            if (child.getVisibility() != GONE) {
+                final FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) child.getLayoutParams();
+                maxHeight = child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin;
+                break;
+            }
+        }
+
+        int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
+        //设置测量的最大值
+        setMeasuredDimension(maxWidth, maxHeight);
+        //修改当前高度为最大高度值
+        int newHeightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST);
+        //重新赋值给子VIEW   然后重新测量子view的高度
+        measureChildren(widthMeasureSpec, newHeightMeasureSpec);
+    }
+
+    //以childView最大高度为最终高度
     private void onMeasureAll(int widthMeasureSpec, int heightMeasureSpec) {
         //先测量子view的高度
         measureChildren(widthMeasureSpec, heightMeasureSpec);
@@ -370,16 +408,7 @@ public class RecyclerViewMultiHeader extends ViewGroup {
 
     @Override
     protected final void onLayout(boolean changed, int l, int t, int r, int b) {
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
-                // final int width = child.getMeasuredWidth();
-                //   final int height = child.getMeasuredHeight();
-                //修改为撑满全屏
-                child.layout(0, 0, getMeasuredWidth(), getMeasuredHeight());
-            }
-        }
+        super.onLayout(changed, l, t, r, b);
         if (changed && isAttachedToRecycler) {
             //  LogUtils.i(tag, "onLayout    changed=" + changed);
             int verticalMargins = 0;
@@ -697,15 +726,6 @@ public class RecyclerViewMultiHeader extends ViewGroup {
     private @interface Visibility {
     }
 
-    @Override
-    public FrameLayout.LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new FrameLayout.LayoutParams(getContext(), attrs);
-    }
-
-    @Override
-    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
-        return p instanceof FrameLayout.LayoutParams;
-    }
 
     private RecyclerView getRecyclerViewRoot() {
         return recyclerRoot;
