@@ -23,7 +23,7 @@
 ## 引入
 * Gradle
 ```groovy
-compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.7'
+compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.8'
 ```
 
 ## 开发
@@ -32,22 +32,30 @@ compile 'com.yyl.multiview:recyclerview-multiheaderview:1.0.7'
     <com.yyl.multiview.RecyclerViewMultiHeader
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:viewState="video"
+            app:viewState="video"  
             app:videoScale="0.5625">//video 9/16
 ....
         </com.yyl.multiview.RecyclerViewMultiHeader>
     
-    
-    
 ```
 
 ```
+viewState
+  <attr name="videoScale" format="float" />//显示比例
+<attr name="viewState">
+     <enum name="video" value="0" />//按videoScale比例 显示headView    在全屏后自动撑满全屏
+     <enum name="view_header" value="1" />//以childView最大高度为最终高度
+     <enum name="web" value="2" />//childView为全屏  其中setRequestFullWeb(false)会在webView内容不足一屏时 不填充整个VIEW
+     <enum name="view_header_top" value="3" />//以最顶层childView高度为最终高度
+</attr>
 // 设置视频监听。
     //视频小窗口开关
    public void setScreenSmallDisable(boolean stateVideoSmallDisable)
     //视频小窗口监听
    public void setOnVideoSmallCallBack(OnVideoSmallCallBack onVideoSmallCallBack)
 
+    //取消关联
+    detach() 
 ```
 
 ### 参考代码

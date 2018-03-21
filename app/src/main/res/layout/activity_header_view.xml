@@ -13,17 +13,20 @@
     <com.yyl.multiview.RecyclerViewMultiHeader
         android:id="@+id/recyclerViewMultiHeader"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="#ffcccc"
         app:viewState="view_header">
 
+        <WebView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <FrameLayout
             android:id="@+id/fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:background="#cc442f4d">
+            android:background="#cc442d">
 
             <ImageView
                 android:layout_width="match_parent"

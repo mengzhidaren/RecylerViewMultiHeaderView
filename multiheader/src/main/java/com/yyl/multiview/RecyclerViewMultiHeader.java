@@ -88,11 +88,7 @@ public class RecyclerViewMultiHeader extends FrameLayout {
         attachToRecyclerView(recycler);
     }
 
-    /**
-     * 关联头View入口
-     *
-     * @param recycler rootView
-     */
+
     public final void attachToHeader(RecyclerView recycler) {
         state = STATE_HEAD;
         attachToRecyclerView(recycler);

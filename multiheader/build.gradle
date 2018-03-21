@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 20180319
-        versionName "1.0.7"
+        versionCode 20180321
+        versionName "1.0.8"
     }
     buildTypes {
         release {
@@ -51,7 +51,7 @@ publish {
     userOrg = 'yuyunlongyyl' //用户所在组织
     groupId = 'com.yyl.multiview'// 包名
     artifactId = 'recyclerview-multiheaderview' // library的名字
-    publishVersion = '1.0.7'// 版本
+    publishVersion = '1.0.8'// 版本
     desc = 'recyclerview-multiheaderview  support:webView,View,Video' // 描述
     website = siteUrl
 }
