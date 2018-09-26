@@ -2,11 +2,11 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    buildToolsVersion '28.0.2'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 20180321
         versionName "1.0.8"
     }
@@ -23,7 +23,7 @@ android {
 }
 
 dependencies {
-    provided 'com.android.support:recyclerview-v7:26.1.0'
+    compileOnly 'com.android.support:recyclerview-v7:26.1.0'
 }
 
 
@@ -36,7 +36,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.novoda:bintray-release:0.8.0'
+        classpath 'com.novoda:bintray-release:0.8.1'
     }
 }
 def siteUrl = 'https://github.com/mengzhidaren'   // 项目的主页

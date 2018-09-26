@@ -47,14 +47,10 @@ public class VideoFragment extends Fragment {
         });
         vlcVideoView = (VlcVideoView) view.findViewById(R.id.vlcVideo);
         textView = (TextView) view.findViewById(R.id.state);
-        vlcVideoView.startPlay(path);
+        vlcVideoView.setPath(path);
+        vlcVideoView.startPlay();
         vlcVideoView.setMediaListenerEvent(new MediaListenerEvent() {
-            @Override
-            public void eventBuffing(float buffing, boolean show) {
-                if (show)
-                    textView.setText("buffing=" + buffing);
-                else textView.setText("isPlaying");
-            }
+
 
             @Override
             public void eventPlayInit(boolean openClose) {
@@ -62,18 +58,42 @@ public class VideoFragment extends Fragment {
             }
 
             @Override
+            public void eventBuffing(int event, float buffing) {
+//                if (show)
+//                    textView.setText("buffing=" + buffing);
+//                else textView.setText("isPlaying");
+            }
+
+            @Override
             public void eventStop(boolean isPlayError) {
-                textView.setText("Stop");
+                textView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        textView.setText("Stop");
+                    }
+                });
+
             }
 
             @Override
             public void eventError(int error, boolean show) {
-                textView.setText("Error");
+                textView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        textView.setText("Error");
+                    }
+                });
             }
 
             @Override
-            public void eventPlay(boolean isPlaying) {
-                textView.setText("isPlaying=" + isPlaying);
+            public void eventPlay(final boolean isPlaying) {
+
+                textView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        textView.setText("isPlaying=" + isPlaying);
+                    }
+                });
             }
         });
     }

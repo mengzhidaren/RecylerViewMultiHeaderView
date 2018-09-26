@@ -8,7 +8,7 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layoutManager="LinearLayoutManager" />
+        app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
 
     <com.yyl.multiview.RecyclerViewMultiHeader
         android:id="@+id/recyclerViewMultiHeader"
@@ -20,7 +20,7 @@
             android:id="@+id/fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#cc747eac"></FrameLayout>
+            android:background="#cc747eac"/>
 
     </com.yyl.multiview.RecyclerViewMultiHeader>
 </FrameLayout>
