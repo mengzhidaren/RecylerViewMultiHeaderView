@@ -6,10 +6,8 @@
 1. 解决webView在RecyclerView中的滑动冲突和点击事件
 2. 增加滑动RecyclerView中视频为小屏模式（功能参考美拍）
 3. 优化过渡绘制卡的问题
+4.RecyclerView和webView之间切换时滑动完美,滑动惯性传递完美
 
-#还未完善的问题
-1. RecyclerView和webView之间切换时滑动完美  但两个之间的滑动惯性传递不是很完美
-（欢迎留言惯性的优化方案）
 
 ### Demo
 可以下载Demo查看。
