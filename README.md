@@ -7,7 +7,7 @@
 2. 增加滑动RecyclerView中视频为小屏模式（功能参考美拍）
 3. 优化过渡绘制卡的问题
 4. (已解决)RecyclerView和webView之间切换时滑动完美,滑动惯性传递完美
-5. 后期可能会对webView加一个滑动条有时间的话
+5. 后期可能会对webView加一个滑动条(有时间的话)
 
 
 ### Demo
@@ -22,7 +22,7 @@
 ## 引入
 * Gradle
 ```groovy
-compile 'com.yyl.multiview:recyclerview-multiheaderview:1.1.0'
+compile 'com.yyl.multiview:recyclerview-multiheaderview:1.1.1'
 ```
 
 ## 开发
