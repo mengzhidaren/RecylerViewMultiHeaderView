@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.webkit.WebView;
 
 import com.yyl.multiview.RecyclerViewMultiHeader;
+import com.yyl.multiview.WebViewProxy;
 import com.yyl.view.R;
 import com.yyl.view.base.AdapterDemo;
 import com.yyl.view.fragment.WebFragment;
@@ -28,7 +29,7 @@ public class WebActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private RecyclerViewMultiHeader recyclerViewMultiHeader;
 
-    public void setWebView(WebView webView) {
+    public void setWebView(WebViewProxy webView) {
         recyclerViewMultiHeader.attachToWebView(recyclerView, webView);
     }
 

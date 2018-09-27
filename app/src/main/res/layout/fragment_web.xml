@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     tools:context="com.yyl.view.fragment.WebFragment">
 
-  <WebView
+  <com.yyl.multiview.WebViewProxy
       android:id="@+id/fragmentWebView"
       android:layout_width="match_parent"
       android:layout_height="match_parent"/>

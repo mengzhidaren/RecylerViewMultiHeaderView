@@ -16,10 +16,26 @@
         android:layout_height="match_parent"
         app:viewState="web">
 
-        <WebView
+        <com.yyl.multiview.WebViewProxy
             android:id="@+id/webView2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
     </com.yyl.multiview.RecyclerViewMultiHeader>
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="test1Click"
+        android:text="detach" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="test2Click"
+        android:layout_gravity="center_horizontal"
+        android:text="reAttachRefresh" />
+
+
 </FrameLayout>

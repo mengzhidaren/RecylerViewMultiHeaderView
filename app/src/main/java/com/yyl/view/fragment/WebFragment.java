@@ -2,6 +2,7 @@ package com.yyl.view.fragment;
 
 
 import android.graphics.Bitmap;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,12 +11,14 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.yyl.multiview.WebViewProxy;
 import com.yyl.view.R;
 import com.yyl.view.ui.WebActivity;
 
@@ -24,7 +27,7 @@ import com.yyl.view.ui.WebActivity;
  */
 public class WebFragment extends Fragment {
 
-    private WebView webView;
+    private WebViewProxy webView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,6 +44,25 @@ public class WebFragment extends Fragment {
         webView.loadUrl("https://toutiao.io/c/java");
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        webView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        webView.onPause();
+    }
+
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        webView.destroy();
+    }
 
     private void setWebSeting() {
         WebSettings settings = webView.getSettings();
@@ -61,6 +83,13 @@ public class WebFragment extends Fragment {
     }
 
     public static class MyWebViewClient extends WebViewClient {
+
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+         //   super.onReceivedSslError(view, handler, error);
+           handler.proceed();
+        }
+
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
             super.onReceivedError(view, request, error);
@@ -87,7 +116,7 @@ public class WebFragment extends Fragment {
         @Override
         public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
             view.loadUrl(url);
-            return super.shouldOverrideUrlLoading(view, url);
+            return true;
         }
     }
 }

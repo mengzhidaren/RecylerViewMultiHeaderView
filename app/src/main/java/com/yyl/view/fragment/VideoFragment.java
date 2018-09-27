@@ -20,12 +20,18 @@ public class VideoFragment extends Fragment {
 
     private VlcVideoView vlcVideoView;
     private TextView textView;
-    String path = "http://img1.peiyinxiu.com/2014121211339c64b7fb09742e2c.mp4";
+    String path = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_video, container, false);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        vlcVideoView.onStop();
     }
 
     @Override

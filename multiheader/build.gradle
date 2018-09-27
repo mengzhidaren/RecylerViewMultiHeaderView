@@ -1,14 +1,14 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '28.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 26
-        versionCode 20180321
-        versionName "1.0.8"
+        targetSdkVersion 27
+        versionCode 20180927
+        versionName "1.1.0"
     }
     buildTypes {
         release {
@@ -23,7 +23,7 @@ android {
 }
 
 dependencies {
-    compileOnly 'com.android.support:recyclerview-v7:26.1.0'
+    compileOnly 'com.android.support:recyclerview-v7:27.1.1'
 }
 
 
@@ -51,7 +51,7 @@ publish {
     userOrg = 'yuyunlongyyl' //用户所在组织
     groupId = 'com.yyl.multiview'// 包名
     artifactId = 'recyclerview-multiheaderview' // library的名字
-    publishVersion = '1.0.8'// 版本
+    publishVersion = '1.1.0'// 版本
     desc = 'recyclerview-multiheaderview  support:webView,View,Video' // 描述
     website = siteUrl
 }

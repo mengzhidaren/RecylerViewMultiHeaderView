@@ -18,11 +18,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.FrameLayout;
 
 import java.lang.annotation.Retention;
@@ -55,9 +54,9 @@ public class RecyclerViewMultiHeader extends FrameLayout {
     private boolean stateVideoSmallDisable;
     private RecyclerViewDelegate recyclerView;
     private LayoutManagerDelegate layoutManager;
-
+    private RecyclerViewProxyVelocity recyclerViewProxyVelocity;
     private RecyclerView recyclerRoot;
-    private WebView webViewRoot;
+    private WebViewProxy webViewRoot;
     //默认视频比例
     private float videoScale = 9f / 16f;
     private float mTouchSlop;
@@ -80,26 +79,46 @@ public class RecyclerViewMultiHeader extends FrameLayout {
      * @param recycler rootView
      * @param webView  rootWebView
      */
-    public final void attachToWebView(RecyclerView recycler, WebView webView) {
-        validate(webView);
+    public final void attachToWebView(RecyclerView recycler, WebViewProxy webView) {
+        if (isAttachedToRecycler) return;
+        state = STATE_WEB;
         this.webViewRoot = webView;
         this.webViewScrollBarEnabled = webView.isVerticalScrollBarEnabled();
-        state = STATE_WEB;
+        webViewRoot.attachView(new OnCallBackVelocity() {
+            @Override
+            public void callBackVelocity(int velocity) {
+                if (recyclerRoot != null) {
+                    recyclerRoot.fling(0, velocity);
+                }
+            }
+        });
+        recyclerViewProxyVelocity = new RecyclerViewProxyVelocity(getContext());
+        recyclerViewProxyVelocity.attachView(recycler, new OnCallBackVelocity() {
+            @Override
+            public void callBackVelocity(int velocity) {
+                if (webViewRoot != null) {
+                    webViewRoot.flingScroll(0, velocity);
+                }
+            }
+        });
         attachToRecyclerView(recycler);
     }
 
 
     public final void attachToHeader(RecyclerView recycler) {
+        if (isAttachedToRecycler) return;
         state = STATE_HEAD;
         attachToRecyclerView(recycler);
     }
 
     public final void attachToVideo(@NonNull final RecyclerView recycler) {
+        if (isAttachedToRecycler) return;
         state = STATE_VIDEO;
         attachToRecyclerView(recycler);
     }
 
     public final void attachToHeaderTopView(@NonNull final RecyclerView recycler) {
+        if (isAttachedToRecycler) return;
         state = STATE_HEAD_TOP;
         attachToRecyclerView(recycler);
     }
@@ -135,16 +154,30 @@ public class RecyclerViewMultiHeader extends FrameLayout {
     }
 
     /**
+     * detach after callback
+     */
+    public final void reAttachRefresh() {
+        computeHeadHeight();
+    }
+
+    /**
      * Detaches <code>RecyclerViewHeader</code> from <code>RecyclerView</code>.
      */
     public final void detach() {
         if (isAttachedToRecycler) {
             isAttachedToRecycler = false;
             recyclerWantsTouch = false;
+            if (webViewRoot != null) {
+                webViewRoot.detach();
+                webViewRoot = null;
+            }
+            if (recyclerViewProxyVelocity != null) {
+                recyclerViewProxyVelocity.detach();
+                recyclerViewProxyVelocity = null;
+            }
             recyclerView.reset();
             recyclerView = null;
             layoutManager = null;
-            webViewRoot = null;
             recyclerRoot = null;
         }
     }
@@ -188,7 +221,7 @@ public class RecyclerViewMultiHeader extends FrameLayout {
         } else if (state == STATE_IDLE) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         } else {
-            onMeasureAll(widthMeasureSpec, heightMeasureSpec);
+            onMeasureHeadView(widthMeasureSpec, heightMeasureSpec);
         }
         i(tag, "onMeasure  measureWidth=" + getMeasuredWidth() + "measureHeight" + getMeasuredHeight());
     }
@@ -239,7 +272,7 @@ public class RecyclerViewMultiHeader extends FrameLayout {
     }
 
     //以childView最大高度为最终高度
-    private void onMeasureAll(int widthMeasureSpec, int heightMeasureSpec) {
+    private void onMeasureHeadView(int widthMeasureSpec, int heightMeasureSpec) {
         //先测量子view的高度
         measureChildren(widthMeasureSpec, heightMeasureSpec);
         int maxHeight = 0;
@@ -406,20 +439,23 @@ public class RecyclerViewMultiHeader extends FrameLayout {
     protected final void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         if (changed && isAttachedToRecycler) {
-            //  LogUtils.i(tag, "onLayout    changed=" + changed);
-            int verticalMargins = 0;
-            int horizontalMargins = 0;
-            if (getLayoutParams() instanceof MarginLayoutParams) {
-                final MarginLayoutParams layoutParams = (MarginLayoutParams) getLayoutParams();
-                verticalMargins = layoutParams.topMargin + layoutParams.bottomMargin;
-                horizontalMargins = layoutParams.leftMargin + layoutParams.rightMargin;
-            }
-            if (getHeight() + verticalMargins > 0)
-                videoHeight = getHeight() + verticalMargins;
-            recyclerView.onHeaderSizeChanged(getHeight() + verticalMargins, getWidth() + horizontalMargins);
-            i(tag, "onLayout   onScrollChanged");
-            onScrollChanged();
+            computeHeadHeight();
         }
+    }
+
+    private void computeHeadHeight() {
+        int verticalMargins = 0;
+        int horizontalMargins = 0;
+        if (getLayoutParams() instanceof MarginLayoutParams) {
+            final MarginLayoutParams layoutParams = (MarginLayoutParams) getLayoutParams();
+            verticalMargins = layoutParams.topMargin + layoutParams.bottomMargin;
+            horizontalMargins = layoutParams.leftMargin + layoutParams.rightMargin;
+        }
+        if (getHeight() + verticalMargins > 0)
+            videoHeight = getHeight() + verticalMargins;
+        recyclerView.onHeaderSizeChanged(getHeight() + verticalMargins, getWidth() + horizontalMargins);
+        i(tag, "onLayout   onScrollChanged  ");
+        onScrollChanged();
     }
 
 
@@ -443,7 +479,7 @@ public class RecyclerViewMultiHeader extends FrameLayout {
         if (recyclerWantsTouch && event.getAction() == MotionEvent.ACTION_MOVE) {
             downTranslation = calculateTranslation();
         }
-        //  Log.i(tag, "onInterceptTouchEvent    recyclerWantsTouch=" + recyclerWantsTouch);
+        //  i(tag, "onInterceptTouchEvent    recyclerWantsTouch=" + recyclerWantsTouch);
         return recyclerWantsTouch || super.onInterceptTouchEvent(event);
     }
 
@@ -490,11 +526,9 @@ public class RecyclerViewMultiHeader extends FrameLayout {
         if (recyclerView.getLayoutManager() == null) {
             throw new IllegalStateException("Be sure to attach RecyclerViewHeader after setting your RecyclerView's LayoutManager.");
         }
-    }
-
-    private void validate(WebView webView) {
-        if (webView == null) {
-            throw new IllegalStateException("Be sure to attach RecyclerViewHeader after setting your RecyclerView's LayoutManager.");
+        if (isAttachedToRecycler) {
+            //throw new IllegalStateException("Be sure to attach RecyclerViewHeader once");
+            Log.e("RecyclerViewMultiHeader", "Be sure to attach RecyclerViewHeader once");
         }
     }
 
@@ -727,15 +761,18 @@ public class RecyclerViewMultiHeader extends FrameLayout {
         return recyclerRoot;
     }
 
-    private WebView getWebViewRoot() {
+    private WebViewProxy getWebViewRoot() {
         return webViewRoot;
     }
 
+    //事件流是否改变
     private boolean isPointerIndexWeb;
     private boolean isPointerIndexRecycler;
-    private boolean webViewCanNotControl;
+    //webView是否能内部滑动
+    private boolean webViewNotControl;
     private float lastRawY;
     private float fristRawY;
+
     private boolean canMove;
     private float moveOffset;
 
@@ -751,6 +788,9 @@ public class RecyclerViewMultiHeader extends FrameLayout {
             case MotionEvent.ACTION_UP:
                 getWebViewRoot().onTouchEvent(e);
                 if (!isRecyclerViewTop()) {
+                    if (recyclerViewProxyVelocity != null) {
+                        recyclerViewProxyVelocity.onTouchEvent(e);
+                    }
                     getRecyclerViewRoot().onTouchEvent(e);
                 }
                 getWebViewRoot().setVerticalScrollBarEnabled(webViewScrollBarEnabled);
@@ -766,30 +806,31 @@ public class RecyclerViewMultiHeader extends FrameLayout {
                 return true;
             case MotionEvent.ACTION_MOVE:
                 float newY = e.getRawY();
-                float off = fristRawY - newY;
+                float offsetY = fristRawY - newY;
                 boolean moveUP = lastRawY - newY > 0;//移动方向
                 lastRawY = e.getRawY();
-                if (!canMove && Math.abs(off) > mTouchSlop + 0.5f) {//开始移动
+                if (!canMove && Math.abs(offsetY) > mTouchSlop + 0.5f) {//开始移动
                     canMove = true;
                 }
                 if (!canMove) {
                     getWebViewRoot().onTouchEvent(e);//没有移动时就当发生了  点击事件  发送给WebView
                     return true;
                 }
-                webViewCanNotControl = !isRecyclerViewTop();
+                webViewNotControl = !isRecyclerViewTop();
+                //   i(tag, "webViewNotControl="+webViewNotControl);
                 if (moveUP) {//向上移动
-                    if (webViewCanNotControl) {
+                    if (webViewNotControl) {
                         reTryRecyclerViewTouchEvent(e);
                         return true;
                     }
-                    if (isWebViewBottom()) { //这里判断在移动webview内容向上时 如果滑到底部切换到recyclerview里去
+                    if (isWebViewBottom()) {//WebView是否滑到底 //这里判断在移动webview内容向上时 如果滑到底部切换到recyclerview里去
                         reTryRecyclerViewTouchEvent(e);
                     } else {
                         reTryWebTouchEvent(e);
                     }
                 } else {//向下移动
-                    //   LogUtils.i(tag, "MOVE Down    webNotControl=" + webNotControl + "  isPointerIndexRecycler=" + isPointerIndexRecycler);
-                    if (webViewCanNotControl) {
+                    //   i(tag, "MOVE Down    webNotControl=" + webNotControl + "  isPointerIndexRecycler=" + isPointerIndexRecycler);
+                    if (webViewNotControl) {
                         reTryRecyclerViewTouchEvent(e);
                     } else {
                         reTryWebTouchEvent(e);
@@ -814,7 +855,7 @@ public class RecyclerViewMultiHeader extends FrameLayout {
             e.setAction(MotionEvent.ACTION_DOWN);
         }
         getWebViewRoot().onTouchEvent(e);
-        //  LogUtils.i(tag, isPointerIndexWeb + " WebTouch    isRecyclerViewTop()=" + isRecyclerViewTop() + "   isWebViewBottom=" + isWebViewBottom());
+        //  i(tag, isPointerIndexWeb + " WebTouch    isRecyclerViewTop()=" + isRecyclerViewTop() + "   isWebViewBottom=" + isWebViewBottom());
     }
 
     /**
@@ -839,10 +880,16 @@ public class RecyclerViewMultiHeader extends FrameLayout {
                         0,
                         e.getRawY() + moveOffset,
                         e.getMetaState());
+        if (recyclerViewProxyVelocity != null) {
+            recyclerViewProxyVelocity.onTouchEvent(recyclerEvent);
+        }
         boolean reslut1 = getRecyclerViewRoot().onTouchEvent(recyclerEvent);
+
     }
 
-
+    /**
+     * @return RecyclerView 是否到顶了  true 到顶  false Y轴有移动
+     */
     private boolean isRecyclerViewTop() {
         return !getRecyclerViewRoot().canScrollVertically(-1);
     }
@@ -853,7 +900,9 @@ public class RecyclerViewMultiHeader extends FrameLayout {
      * @return isWebViewBottom WebView是否滑到底
      */
     private boolean isWebViewBottom() {
-        WebView w = getWebViewRoot();
+        //感觉在奇葩手机上判断不稳定  比如 魅族乱改webView的内核
+        //  return getWebViewRoot().isToBottom();
+        WebViewProxy w = getWebViewRoot();
         float webcontent = w.getContentHeight() * w.getScale();
         float webnow = w.getHeight() + w.getScrollY();
         return Math.abs(webcontent - webnow) <= webViewBottomOffset;
@@ -974,7 +1023,9 @@ public class RecyclerViewMultiHeader extends FrameLayout {
     };
 
 
+    //startScroll指定起点（startX，startY），从起点平滑变化（dx，dy），耗时duration，通常用于：知道起点与需要改变的距离的平滑滚动等。
+    //flingScroll惯性滑动。 给定一个初始速度（velocityX，velocityY），该方法内部会根据这个速度去计算需要滑动的距离以及需要耗费的时间。通常用于：界面的惯性滑动等。
     private void i(String tag, String msg) {
-
+        //  Log.i(tag, msg);
     }
 }
