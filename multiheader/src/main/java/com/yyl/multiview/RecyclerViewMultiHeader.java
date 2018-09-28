@@ -61,11 +61,11 @@ public class RecyclerViewMultiHeader extends FrameLayout {
     private float videoScale = 9f / 16f;
     private float mTouchSlop;
     private int webViewBottomOffset = 4;
-    public static final int STATE_VIDEO = 0;
-    public static final int STATE_HEAD = 1;  //标准的headView
-    public static final int STATE_WEB = 2;
+    public static final int STATE_VIDEO = 0;//VideoView
+    public static final int STATE_HEAD = 1;  //标准的HeadView
+    public static final int STATE_WEB = 2;//WebView
     public static final int STATE_HEAD_TOP = 3; //以最顶层VIEW的高度为最终高度
-    public static final int STATE_IDLE = 10;
+    public static final int STATE_IDLE = 10;//default
     private int state = STATE_IDLE;
 
     //是否强制全屏显示webView

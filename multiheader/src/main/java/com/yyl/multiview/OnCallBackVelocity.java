@@ -6,7 +6,7 @@ package com.yyl.multiview;
  *
  * @author yyl
  */
-public interface OnCallBackVelocity {
+interface OnCallBackVelocity {
     // 获取滑动惯性停止时的速度
     void callBackVelocity(int velocity);
 }

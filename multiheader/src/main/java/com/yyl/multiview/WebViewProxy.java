@@ -73,7 +73,7 @@ public class WebViewProxy extends WebView {
         super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
         isToBottomState = false;
         if (clampedY) {
-            if (scrollY > 1) {//
+            if (scrollY > 1) {//到底
                 isToBottomState = true;
                 int velocity = mViewFlinger.getCurrVelocity();
                 Log.i("WebViewProxy", "到底速度：" + velocity);
@@ -83,8 +83,8 @@ public class WebViewProxy extends WebView {
                 //  Log.i("WebViewProxy", "到顶速度：" + mViewFlinger.getCurrVelocity());
             }
         }
-        if (isToBottomState)
-            Log.i("WebViewProxy", "isToBottomState=" + isToBottomState);
+//        if (isToBottomState)
+//            Log.i("WebViewProxy", "isToBottomState=" + isToBottomState);
     }
 
 

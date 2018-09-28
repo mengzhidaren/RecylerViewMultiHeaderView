@@ -6,13 +6,10 @@
 1. 解决webView在RecyclerView中的滑动冲突和点击事件
 2. 增加滑动RecyclerView中视频为小屏模式（功能参考美拍）
 3. 优化过渡绘制卡的问题
-4. (已解决)RecyclerView和webView之间切换时滑动完美,滑动惯性传递完美
-5. 后期可能会对webView加一个滑动条(有时间的话)
+4. RecyclerView和webView之间滑动惯性传递
+5. (后期可能会对webView和recyclerView的滑动条合并成一个(有时间的话))
 
 
-### Demo
-可以下载Demo查看。
-[Download](https://github.com/mengzhidaren/RecylerViewMultiHeaderView/blob/master/apk/debug/app-debug.apk?raw=true)
 # 截图
 ## HeaderVideo  HeaderView   
 <image src="./img/111.gif" width="300px"/>  <image src="./img/222.gif" width="300px"/>  
