@@ -3,11 +3,11 @@
 ###RecyclerView头View的ViewGroup，支持与WebView，Video,View 嵌套使用
 
 # 特性
-1. 解决webView在RecyclerView中的滑动冲突和点击事件
-2. 增加滑动RecyclerView中视频为小屏模式（功能参考美拍）
-3. 优化过渡绘制卡的问题
-4. RecyclerView和webView之间滑动惯性传递
-5. (后期可能会对webView和recyclerView的滑动条合并成一个(有时间的话))
+1. webView完美嵌入RecyclerView
+2. RecyclerView和webView之间滑动惯性传递
+3. 滑动RecyclerView中视频切换为mini小屏
+4. 优化过渡绘制卡顿的问题
+
 
 
 # 截图
@@ -19,11 +19,11 @@
 ## 引入
 * Gradle
 ```groovy
-compile 'com.yyl.multiview:recyclerview-multiheaderview:1.1.1'
+implementation 'com.yyl.multiview:recyclerview-multiheaderview:1.1.2'
 ```
 
 ## 开发
-在xml中引用RecyclerViewMultiHeader：
+在xml中引用RecyclerViewMultiHeader(参考demo)
 ```xml
     <com.yyl.multiview.RecyclerViewMultiHeader
             android:layout_width="match_parent"

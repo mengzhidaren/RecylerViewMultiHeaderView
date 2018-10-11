@@ -55,9 +55,6 @@ public class WebViewProxy extends WebView {
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
         mMaxFlingVelocity = vc.getScaledMaximumFlingVelocity();
         setVerticalScrollBarEnabled(false);
-//        setScrollbarFadingEnabled(true);
-        // setScrollBarStyle(SCROLLBARS_INSIDE_INSET);
-//        setVerticalScrollBarEnabled(false);
     }
 
     public void attachView(WebViewProxyScrollBar scrollBar,OnCallBackVelocity onCallBackVelocity) {
@@ -92,20 +89,17 @@ public class WebViewProxy extends WebView {
         int extent = computeVerticalScrollExtent();//可见范围
         int offset = computeVerticalScrollOffset();//偏移范范围 到顶为0    offset == scrollY
         int range = computeVerticalScrollRange();//总范围
-        //  Log.i("WebViewProxy", "extent：" + extent +"  offset：" + offset  +"  range：" + range +" scrollY="+scrollY +" clampedY="+clampedY  );
 
         isToBottomState = range - (extent + offset) <= webViewBottomOffset;
         if (clampedY && isToBottomState) {//到底
             int velocity = mViewFlinger.getCurrVelocity();
-            RecyclerViewMultiHeader.i("WebViewProxy", "到底速度：" + velocity);
+//            RecyclerViewMultiHeader.i("WebViewProxy", "到底速度：" + velocity);
             if (velocity > 0 && onCallBackVelocity != null)
                 onCallBackVelocity.callBackVelocity(velocity);
         }
         if(scrollBar!=null){
             scrollBar.onProgressWebView(extent,offset,range);
         }
-//        if (isToBottomState)
-//            Log.i("WebViewProxy", "isToBottomState=" + isToBottomState);
     }
 
 
@@ -128,7 +122,7 @@ public class WebViewProxy extends WebView {
                 eventAddedToVelocityTracker = true;
                 mVelocityTracker.computeCurrentVelocity(1000, mMaxFlingVelocity);
                 float yVelocity = -mVelocityTracker.getYVelocity(mScrollPointerId);
-                RecyclerViewMultiHeader.i("WebViewProxy", "速度取值：" + yVelocity);
+//                RecyclerViewMultiHeader.i("WebViewProxy", "速度取值：" + yVelocity);
                 if (Math.abs(yVelocity) < mMinFlingVelocity) {
                     yVelocity = 0F;
                 } else {

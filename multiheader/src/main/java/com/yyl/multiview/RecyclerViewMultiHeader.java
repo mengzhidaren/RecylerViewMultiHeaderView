@@ -72,15 +72,17 @@ public class RecyclerViewMultiHeader extends FrameLayout {
     //false  在webView内容不足一屏时 不填充整个VIEW 只是做为一个标准的headView
     private boolean isRequestFullWeb = true;
 
+    @Deprecated
+    public final void attachToWebView(@NonNull final RecyclerView recyclerView,@NonNull final WebViewProxy webViewProxy) {
+       attachToWebView(recyclerView,webViewProxy,null);
+    }
     /**
      * 关联头WebView入口
      *
      * @param recyclerView rootView
      * @param webViewProxy  rootWebView
+     * @param webViewProxyScrollBar  滑动条
      */
-    public final void attachToWebView(@NonNull final RecyclerView recyclerView,@NonNull final WebViewProxy webViewProxy) {
-       attachToWebView(recyclerView,webViewProxy,null);
-    }
     public final void attachToWebView(@NonNull final RecyclerView recyclerView,@NonNull final WebViewProxy webViewProxy,@NonNull final WebViewProxyScrollBar webViewProxyScrollBar) {
         if (isAttachedToRecycler) return;
         state = STATE_WEB;

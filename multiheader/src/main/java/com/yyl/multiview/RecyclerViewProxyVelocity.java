@@ -89,7 +89,7 @@ class RecyclerViewProxyVelocity {
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             if (newState == RecyclerView.SCROLL_STATE_IDLE && recyclerView.computeVerticalScrollOffset() == 0) { //到顶速度
                 int velocity = mViewFlinger.getCurrVelocity();
-                i("RecyclerViewVelociy", "RecyclerViewTouch  到顶速度：" + velocity);
+//                i("RecyclerViewVelociy", "RecyclerViewTouch  到顶速度：" + velocity);
                 if (velocity > 0 && onCallBackVelocity != null) {
                     onCallBackVelocity.callBackVelocity(-velocity);
                 }
@@ -110,7 +110,7 @@ class RecyclerViewProxyVelocity {
             case MotionEvent.ACTION_DOWN: {
                 setScrollState(SCROLL_STATE_IDLE);
                 mScrollPointerId = event.getPointerId(0);
-                i("RecyclerViewVelociy", "ACTION_DOWN： PointerId=" + mScrollPointerId);
+//                i("RecyclerViewVelociy", "ACTION_DOWN： PointerId=" + mScrollPointerId);
                 break;
             }
             case MotionEvent.ACTION_UP: {
@@ -118,7 +118,7 @@ class RecyclerViewProxyVelocity {
                 eventAddedToVelocityTracker = true;
                 mVelocityTracker.computeCurrentVelocity(1000, mMaxFlingVelocity);
                 float yVelocity = -mVelocityTracker.getYVelocity(mScrollPointerId);
-                i("RecyclerViewVelociy", "速度取值：" + (int) yVelocity + "   PointerId=" + mScrollPointerId);
+//                i("RecyclerViewVelociy", "速度取值：" + (int) yVelocity + "   PointerId=" + mScrollPointerId);
                 if (Math.abs(yVelocity) < mMinFlingVelocity) {
                     yVelocity = 0F;
                 } else {
