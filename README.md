@@ -19,7 +19,7 @@
 ## 引入
 * Gradle
 ```groovy
-implementation 'com.yyl.multiview:recyclerview-multiheaderview:1.1.2'
+implementation 'com.yyl.multiview:recyclerview-multiheaderview:1.1.3'
 ```
 
 ## 开发

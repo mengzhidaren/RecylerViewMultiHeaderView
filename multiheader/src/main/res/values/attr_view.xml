@@ -11,6 +11,7 @@
     </declare-styleable>
     <declare-styleable name="WebViewProxyScrollBar">
         <attr name="progressHeight" format="dimension" />
+        <attr name="progressValue" format="float" />
         <attr name="progressColor" format="color" />
     </declare-styleable>
 </resources>

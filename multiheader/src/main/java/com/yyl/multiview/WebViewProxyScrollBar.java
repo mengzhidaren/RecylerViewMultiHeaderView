@@ -29,7 +29,7 @@ public class WebViewProxyScrollBar extends View {
     private int thumbHeight = 100;
     private Paint paint = new Paint();
 
-    private double progress = -1d;
+    private double progress;
 
 
     public WebViewProxyScrollBar(Context context) {
@@ -55,6 +55,7 @@ public class WebViewProxyScrollBar extends View {
                     attrs, R.styleable.WebViewProxyScrollBar);
             thumbHeight = a.getDimensionPixelSize(R.styleable.WebViewProxyScrollBar_progressHeight, thumbHeight);
             progressColor = a.getColor(R.styleable.WebViewProxyScrollBar_progressColor, progressColor);
+            progress = a.getFloat(R.styleable.WebViewProxyScrollBar_progressValue, 0f);
             a.recycle();
         }
 
@@ -110,9 +111,6 @@ public class WebViewProxyScrollBar extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         //  super.onDraw(canvas);
-        if(progress<0.0d&&!isInEditMode()){
-            return;
-        }
         int height = getHeight();
         int width = getWidth();
         int top = (int) ((height - thumbHeight) * progress);

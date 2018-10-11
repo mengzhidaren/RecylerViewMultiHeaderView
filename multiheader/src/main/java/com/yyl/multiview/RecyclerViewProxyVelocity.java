@@ -62,6 +62,9 @@ class RecyclerViewProxyVelocity {
         this.recyclerView = recyclerView;
         linearLayoutManager=(LinearLayoutManager)recyclerView.getLayoutManager();
         this.scrollBar = scrollBar;
+        if(scrollBar!=null){
+            recyclerView.setVerticalScrollBarEnabled(false);
+        }
         this.onCallBackVelocity = onCallBackVelocity;
         recyclerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
