@@ -23,4 +23,10 @@
             android:background="#cc747eac"/>
 
     </com.yyl.multiview.RecyclerViewMultiHeader>
+
+    <com.yyl.multiview.WebViewProxyScrollBar
+        android:id="@+id/scrollBar"
+        android:layout_width="4dp"
+        android:layout_gravity="right"
+        android:layout_height="match_parent" />
 </FrameLayout>

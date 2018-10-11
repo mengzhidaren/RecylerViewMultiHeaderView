@@ -12,6 +12,7 @@ import android.webkit.WebView;
 
 import com.yyl.multiview.RecyclerViewMultiHeader;
 import com.yyl.multiview.WebViewProxy;
+import com.yyl.multiview.WebViewProxyScrollBar;
 import com.yyl.view.R;
 import com.yyl.view.base.AdapterDemo;
 import com.yyl.view.fragment.WebFragment;
@@ -32,7 +33,7 @@ public class Web2Activity extends AppCompatActivity {
         webView = findViewById(R.id.webView2);
         setWebSeting();
         recyclerViewMultiHeader.setRequestFullWeb(true);
-        recyclerViewMultiHeader.attachToWebView(recyclerView, webView);
+        recyclerViewMultiHeader.attachToWebView(recyclerView, webView,(WebViewProxyScrollBar)findViewById(R.id.scrollBar));
         recyclerView.setAdapter(new AdapterDemo());
         webView.loadUrl("https://toutiao.io/c/java");
     }
@@ -62,7 +63,7 @@ public class Web2Activity extends AppCompatActivity {
     }
 
     public void test2Click(View view) {
-        recyclerViewMultiHeader.attachToWebView(recyclerView, webView);
+        recyclerViewMultiHeader.attachToWebView(recyclerView, webView,(WebViewProxyScrollBar)findViewById(R.id.scrollBar));
         recyclerViewMultiHeader.reAttachRefresh();
     }
 

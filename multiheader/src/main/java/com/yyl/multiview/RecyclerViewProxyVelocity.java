@@ -2,8 +2,8 @@ package com.yyl.multiview;
 
 import android.content.Context;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -24,7 +24,7 @@ class RecyclerViewProxyVelocity {
 
 
     private RecyclerView recyclerView;
-
+    private WebViewProxyScrollBar scrollBar;
     private OnCallBackVelocity onCallBackVelocity;
     //模拟惯性衰减过程
     private final ViewFlinger mViewFlinger;
@@ -40,7 +40,7 @@ class RecyclerViewProxyVelocity {
     private VelocityTracker mVelocityTracker;
     private int mMinFlingVelocity;
     private int mMaxFlingVelocity;
-
+    private  LinearLayoutManager linearLayoutManager;
     public RecyclerViewProxyVelocity(Context context) {
         mViewFlinger = new ViewFlinger(context);
         ViewConfiguration vc = ViewConfiguration.get(context);
@@ -52,13 +52,16 @@ class RecyclerViewProxyVelocity {
         setScrollState(SCROLL_STATE_IDLE);
         recyclerView.removeOnScrollListener(listener);
         recyclerView.setOnTouchListener(null);
+        linearLayoutManager=null;
         onCallBackVelocity = null;
         recyclerView = null;
-
+        scrollBar = null;
     }
 
-    public void attachView(RecyclerView recyclerView, OnCallBackVelocity onCallBackVelocity) {
+    public void attachView(RecyclerView recyclerView, WebViewProxyScrollBar scrollBar, OnCallBackVelocity onCallBackVelocity) {
         this.recyclerView = recyclerView;
+        linearLayoutManager=(LinearLayoutManager)recyclerView.getLayoutManager();
+        this.scrollBar = scrollBar;
         this.onCallBackVelocity = onCallBackVelocity;
         recyclerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -71,11 +74,22 @@ class RecyclerViewProxyVelocity {
 
 
     private RecyclerView.OnScrollListener listener = new RecyclerView.OnScrollListener() {
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            if (scrollBar != null) {
+                int extent = recyclerView.computeVerticalScrollExtent();
+                int offset = recyclerView.computeVerticalScrollOffset();
+                int range = recyclerView.computeVerticalScrollRange();
+                scrollBar.onProgressRecyclerView(extent, offset, range,linearLayoutManager.findFirstVisibleItemPosition()==0);
+            }
+        }
+
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             if (newState == RecyclerView.SCROLL_STATE_IDLE && recyclerView.computeVerticalScrollOffset() == 0) { //到顶速度
                 int velocity = mViewFlinger.getCurrVelocity();
-                Log.i("RecyclerViewVelociy", "RecyclerViewTouch  到顶速度：" + velocity);
+                i("RecyclerViewVelociy", "RecyclerViewTouch  到顶速度：" + velocity);
                 if (velocity > 0 && onCallBackVelocity != null) {
                     onCallBackVelocity.callBackVelocity(-velocity);
                 }
@@ -96,7 +110,7 @@ class RecyclerViewProxyVelocity {
             case MotionEvent.ACTION_DOWN: {
                 setScrollState(SCROLL_STATE_IDLE);
                 mScrollPointerId = event.getPointerId(0);
-                Log.i("RecyclerViewVelociy", "ACTION_DOWN： PointerId=" + mScrollPointerId);
+                i("RecyclerViewVelociy", "ACTION_DOWN： PointerId=" + mScrollPointerId);
                 break;
             }
             case MotionEvent.ACTION_UP: {
@@ -104,7 +118,7 @@ class RecyclerViewProxyVelocity {
                 eventAddedToVelocityTracker = true;
                 mVelocityTracker.computeCurrentVelocity(1000, mMaxFlingVelocity);
                 float yVelocity = -mVelocityTracker.getYVelocity(mScrollPointerId);
-                Log.i("RecyclerViewVelociy", "速度取值：" + (int) yVelocity + "   PointerId=" + mScrollPointerId);
+                i("RecyclerViewVelociy", "速度取值：" + (int) yVelocity + "   PointerId=" + mScrollPointerId);
                 if (Math.abs(yVelocity) < mMinFlingVelocity) {
                     yVelocity = 0F;
                 } else {
@@ -220,5 +234,8 @@ class RecyclerViewProxyVelocity {
                 }
             }
         }
+    }
+    private void i(String tag, String msg) {
+        RecyclerViewMultiHeader.i(tag,msg);
     }
 }

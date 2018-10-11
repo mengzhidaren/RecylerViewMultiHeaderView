@@ -9,4 +9,8 @@
             <enum name="view_header_top" value="3" />
         </attr>
     </declare-styleable>
+    <declare-styleable name="WebViewProxyScrollBar">
+        <attr name="progressHeight" format="dimension" />
+        <attr name="progressColor" format="color" />
+    </declare-styleable>
 </resources>
